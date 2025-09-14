@@ -146,13 +146,10 @@
             margin: 20px;
         }
         
-        .story-content {
-            background: rgba(0,0,0,0.8);
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            color: white;
-            margin: 20px;
+        .video-wrapper video {
+            width: 100%;
+            height: auto;
+            display: block;
         }
         
         .video-controls {
@@ -215,7 +212,7 @@
             justify-content: center;
         }
         
-        .game-button:hover {
+        .game-button:hover:not(.locked) {
             background: rgba(255,255,255,0.2);
             border-color: #4ecca3;
             transform: translateY(-5px);
@@ -432,6 +429,35 @@
             100% { transform: scale(1.05); }
         }
         
+        /* 落字遊戲樣式 */
+        #fallingWordsCanvas {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+        }
+        
+        .sword {
+            position: absolute;
+            width: 4px;
+            height: 100px;
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .sword::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: -8px;
+            width: 20px;
+            height: 15px;
+            background: #8b5cf6;
+            border-radius: 5px;
+        }
+        
         /* 按鈕樣式 */
         .sound-btn {
             color: white;
@@ -561,6 +587,11 @@
                 height: 25px;
                 font-size: 12px;
             }
+            
+            #fallingWordsCanvas {
+                width: 350px;
+                height: 500px;
+            }
         }
     </style>
 </head>
@@ -590,25 +621,49 @@
     
     <!-- 故事/影片畫面 -->
     <div id="storyScreen" class="screen">
-        <div class="story-content">
-            <h2 style="font-size: 2em; margin-bottom: 20px;">🎬 遊戲介紹</h2>
-            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">
-                歡迎來到英語過去式發音冒險！<br>
-                在這個神奇的世界中，你將學習英語過去式的三種發音：<br>
-                /t/、/d/ 和 /ɪd/
-            </p>
-            <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin: 20px 0;">
-                <h3 style="color: #4ecca3; margin-bottom: 15px;">🎯 學習目標</h3>
-                <ul style="text-align: left; padding-left: 20px; line-height: 1.8;">
-                    <li><strong>/t/ 音：</strong>如 watched, kicked, helped</li>
-                    <li><strong>/d/ 音：</strong>如 played, lived, moved</li>
-                    <li><strong>/ɪd/ 音：</strong>如 wanted, needed, decided</li>
-                </ul>
+        <div class="video-wrapper">
+            <!-- 實際的影片元素，帶有完整控制 -->
+            <video id="introVideo" controls preload="metadata" muted>
+                <!-- 如果有實際影片文件，取消註釋以下行 -->
+                <!-- <source src="assets/video/intro.mp4" type="video/mp4"> -->
+                
+                <!-- 模擬影片內容的替代顯示 -->
+                <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #2c3e50, #34495e); display: flex; align-items: center; justify-content: center; color: white; text-align: center; padding: 40px;">
+                    <div>
+                        <h2 style="font-size: 2em; margin-bottom: 20px;">🎬 遊戲介紹影片</h2>
+                        <p style="font-size: 18px; line-height: 1.6; margin-bottom: 20px;">
+                            歡迎來到英語過去式發音冒險！<br>
+                            在這個神奇的世界中，你將學習三種過去式發音
+                        </p>
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px;">
+                            <h3 style="color: #4ecca3; margin-bottom: 15px;">學習目標</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+                                <div>
+                                    <div style="color: #3498db; font-size: 24px;">🔵</div>
+                                    <div style="font-weight: bold;">/t/ 音</div>
+                                    <div style="font-size: 14px;">watched, kicked</div>
+                                </div>
+                                <div>
+                                    <div style="color: #e74c3c; font-size: 24px;">🔴</div>
+                                    <div style="font-weight: bold;">/d/ 音</div>
+                                    <div style="font-size: 14px;">played, lived</div>
+                                </div>
+                                <div>
+                                    <div style="color: #2ecc71; font-size: 24px;">🟢</div>
+                                    <div style="font-weight: bold;">/ɪd/ 音</div>
+                                    <div style="font-size: 14px;">wanted, needed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </video>
+            <div class="video-controls">
+                <h3 style="color: white; margin: 0 0 15px 0;">🎬 遊戲介紹</h3>
+                <p style="color: #ccc; margin: 0 0 20px 0;">觀看故事介紹或直接開始遊戲</p>
+                <button id="skipIntroBtn" class="video-control-btn secondary">⏭️ 跳過介紹</button>
+                <button id="continueStoryBtn" class="video-control-btn">▶️ 開始遊戲</button>
             </div>
-        </div>
-        <div class="video-controls">
-            <button id="skipIntroBtn" class="video-control-btn secondary">⏭️ 跳過介紹</button>
-            <button id="continueStoryBtn" class="video-control-btn">▶️ 開始遊戲</button>
         </div>
     </div>
     
@@ -771,6 +826,12 @@
                 
                 // 語言切換
                 document.getElementById('languageToggle').onclick = () => this.toggleLanguage();
+                
+                // 影片事件
+                this.currentVideo = document.getElementById('introVideo');
+                if (this.currentVideo) {
+                    this.currentVideo.onended = () => this.continueFromVideo();
+                }
             }
             
             showMainMenu() {
@@ -782,16 +843,14 @@
             showStory() {
                 console.log('📖 顯示故事');
                 this.screenManager.showScreen('storyScreen');
-                // 不自動播放影片，讓用戶選擇
+                // 不自動播放影片，讓用戶控制
             }
             
             stopAnyVideo() {
-                // 停止任何可能播放的影片
                 if (this.currentVideo) {
                     this.currentVideo.pause();
                     this.currentVideo.currentTime = 0;
-                    this.currentVideo = null;
-                    console.log('🛑 影片已停止');
+                    console.log('🛑 影片已停止並重置');
                 }
             }
             
@@ -857,8 +916,14 @@
                 
                 if (gameId === 'wordSearch') {
                     this.loadWordSearchGame(gameContent);
+                } else if (gameId === 'fallingWords') {
+                    this.loadFallingWordsGame(gameContent);
+                } else if (gameId === 'multipleChoice') {
+                    this.loadMultipleChoiceGame(gameContent);
+                } else if (gameId === 'bossFight') {
+                    this.loadBossFightGame(gameContent);
                 } else {
-                    // 其他遊戲的佔位符
+                    // 備用
                     gameContent.innerHTML = `
                         <div style="text-align: center; padding: 50px;">
                             <h2>🚧 ${gameId} 即將推出！</h2>
@@ -1046,6 +1111,197 @@
                 this.setupWordSearchGame();
             }
             
+            loadFallingWordsGame(container) {
+                console.log('⚔️ 載入落字遊戲');
+                
+                container.innerHTML = `
+                    <div style="min-height: 100vh; color: white; padding: 20px; text-align: center;">
+                        <h1 style="font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+                            ⚔️ 單詞戰士
+                        </h1>
+                        
+                        <p style="font-size: 18px; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            用你的劍斬開帶有正確發音的石塊！選擇目標發音類型，然後點擊相應的單詞來得分。
+                        </p>
+                        
+                        <!-- 遊戲統計 -->
+                        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div style="text-align: center;">
+                                <div style="color: #4ecca3; font-size: 24px; font-weight: bold;">得分</div>
+                                <div id="fallingScore" style="font-size: 32px;">0</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #f39c12; font-size: 24px; font-weight: bold;">時間</div>
+                                <div id="fallingTime" style="font-size: 32px;">60</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="color: #e74c3c; font-size: 24px; font-weight: bold;">目標</div>
+                                <div id="fallingTarget" style="font-size: 18px;">/t/ 音</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 發音選擇 -->
+                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; display: inline-block;">
+                            <div style="margin-bottom: 10px; font-weight: bold;">選擇目標發音:</div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="falling-sound-btn" data-sound="t" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🔵 /t/</button>
+                                <button class="falling-sound-btn" data-sound="d" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🔴 /d/</button>
+                                <button class="falling-sound-btn" data-sound="id" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🟢 /ɪd/</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 遊戲區域 -->
+                        <div style="position: relative; display: inline-block; margin-bottom: 20px;">
+                            <canvas id="fallingWordsCanvas" width="450" height="600" style="border: 3px solid rgba(255,255,255,0.3); border-radius: 10px; background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);"></canvas>
+                            <div id="fallingGameOver" style="
+                                position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                                background: rgba(0,0,0,0.9); color: white; padding: 30px; border-radius: 15px; 
+                                text-align: center; display: none;">
+                                <h2>🎉 遊戲結束！</h2>
+                                <div id="finalScore" style="font-size: 24px; margin: 15px 0;"></div>
+                                <button id="playAgainBtn" style="background: #4ecca3; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 5px;">🔄 再玩一次</button>
+                                <button onclick="window.gameSystem.showGameMenu()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); padding: 10px 20px; border-radius: 8px; cursor: pointer; margin: 5px;">🏠 返回</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 控制按鈕 -->
+                        <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                            <button id="startFallingBtn" style="background: #4ecca3; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">▶️ 開始遊戲</button>
+                            <button id="pauseFallingBtn" style="background: #f39c12; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;" disabled>⏸️ 暫停</button>
+                            <button onclick="window.gameSystem.showGameMenu()" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">🏠 返回</button>
+                        </div>
+                        
+                        <!-- 遊戲說明 -->
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-top: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <h3 style="color: #4ecca3; margin-bottom: 15px;">🎮 遊戲說明</h3>
+                            <ul style="text-align: left; padding-left: 20px; line-height: 1.8;">
+                                <li>選擇一個目標發音類型 (/t/, /d/, 或 /ɪd/)</li>
+                                <li>從上方落下的單詞中點擊正確發音的單詞</li>
+                                <li>正確的單詞給 10 分，錯誤的扣 5 分</li>
+                                <li>在 60 秒內得到盡可能高的分數</li>
+                                <li>達到 100 分完成遊戲並解鎖下一關</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                this.setupFallingWordsGame();
+            }
+            
+            loadMultipleChoiceGame(container) {
+                console.log('🧙‍♂️ 載入選擇題遊戲');
+                
+                container.innerHTML = `
+                    <div style="min-height: 100vh; color: white; padding: 20px; text-align: center;">
+                        <h1 style="font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+                            🧙‍♂️ 發音大師
+                        </h1>
+                        <p style="font-size: 18px; margin-bottom: 30px;">聽發音選擇正確的類型，成為真正的發音大師！</p>
+                        
+                        <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; max-width: 600px; margin: 0 auto;">
+                            <div id="mcProgress" style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">問題 1 / 10</div>
+                            
+                            <div id="mcWord" style="font-size: 48px; margin: 30px 0; color: #4ecca3; font-weight: bold;">PLAYED</div>
+                            
+                            <button id="mcPlayBtn" style="
+                                background: #9b59b6; color: white; border: none; padding: 15px 30px; 
+                                border-radius: 10px; font-size: 18px; margin-bottom: 30px; cursor: pointer;">
+                                🔊 播放發音
+                            </button>
+                            
+                            <div style="display: grid; gap: 15px; margin-bottom: 30px;">
+                                <button class="mc-option" data-answer="t" style="
+                                    background: rgba(52, 152, 219, 0.2); border: 2px solid #3498db; color: white; 
+                                    padding: 20px; border-radius: 10px; font-size: 18px; cursor: pointer; transition: all 0.3s;">
+                                    🔵 /t/ 音 (如: watched, kicked)
+                                </button>
+                                <button class="mc-option" data-answer="d" style="
+                                    background: rgba(231, 76, 60, 0.2); border: 2px solid #e74c3c; color: white; 
+                                    padding: 20px; border-radius: 10px; font-size: 18px; cursor: pointer; transition: all 0.3s;">
+                                    🔴 /d/ 音 (如: played, lived)
+                                </button>
+                                <button class="mc-option" data-answer="id" style="
+                                    background: rgba(46, 204, 113, 0.2); border: 2px solid #2ecc71; color: white; 
+                                    padding: 20px; border-radius: 10px; font-size: 18px; cursor: pointer; transition: all 0.3s;">
+                                    🟢 /ɪd/ 音 (如: wanted, needed)
+                                </button>
+                            </div>
+                            
+                            <div id="mcScore" style="font-size: 20px; font-weight: bold;">得分: <span style="color: #4ecca3;">0</span> / 10</div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button onclick="window.gameSystem.showGameMenu()" style="
+                                background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
+                                padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer;">
+                                🏠 返回遊戲選單
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                this.setupMultipleChoiceGame();
+            }
+            
+            loadBossFightGame(container) {
+                console.log('👑 載入Boss戰遊戲');
+                
+                container.innerHTML = `
+                    <div style="min-height: 100vh; color: white; padding: 20px; text-align: center;">
+                        <h1 style="font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
+                            👑 發音之王挑戰
+                        </h1>
+                        <p style="font-size: 18px; margin-bottom: 30px;">面對最終挑戰，擊敗發音之王！</p>
+                        
+                        <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; max-width: 800px; margin: 0 auto;">
+                            <h2 style="color: #fbbf24; margin-bottom: 30px;">🏆 恭喜完成所有挑戰！</h2>
+                            
+                            <div style="background: rgba(0,0,0,0.3); padding: 30px; border-radius: 10px; margin: 20px 0;">
+                                <h3 style="color: #4ecca3; margin-bottom: 20px;">🎓 你已經掌握了英語過去式發音！</h3>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 48px; margin-bottom: 10px;">🔵</div>
+                                        <div style="font-weight: bold; color: #3498db;">/t/ 音</div>
+                                        <div style="font-size: 14px; opacity: 0.8;">watched, kicked, helped</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 48px; margin-bottom: 10px;">🔴</div>
+                                        <div style="font-weight: bold; color: #e74c3c;">/d/ 音</div>
+                                        <div style="font-size: 14px; opacity: 0.8;">played, lived, moved</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 48px; margin-bottom: 10px;">🟢</div>
+                                        <div style="font-weight: bold; color: #2ecc71;">/ɪd/ 音</div>
+                                        <div style="font-size: 14px; opacity: 0.8;">wanted, needed, decided</div>
+                                    </div>
+                                </div>
+                                
+                                <p style="font-size: 18px; margin: 20px 0; line-height: 1.6;">
+                                    現在你已經可以正確區分英語過去式的三種發音了！<br>
+                                    繼續練習，讓這些知識成為你的第二天性。
+                                </p>
+                            </div>
+                            
+                            <div style="margin-top: 30px;">
+                                <button onclick="window.gameSystem.resetAllProgress()" style="
+                                    background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
+                                    padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; 
+                                    cursor: pointer; margin: 10px;">
+                                    🔄 重新開始冒險
+                                </button>
+                                <button onclick="window.gameSystem.showGameMenu()" style="
+                                    background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
+                                    padding: 15px 30px; border-radius: 10px; font-size: 18px; font-weight: bold; 
+                                    cursor: pointer; margin: 10px;">
+                                    🏠 返回選單
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
             setupWordSearchGame() {
                 console.log('🎯 設置單詞搜索遊戲邏輯');
                 
@@ -1059,24 +1315,50 @@
                 };
             }
             
+            setupFallingWordsGame() {
+                console.log('⚔️ 設置落字遊戲邏輯');
+                const fallingGame = new FallingWordsGameLogic();
+                fallingGame.init();
+            }
+            
+            setupMultipleChoiceGame() {
+                console.log('🧙‍♂️ 設置選擇題遊戲邏輯');
+                const mcGame = new MultipleChoiceGameLogic();
+                mcGame.init();
+            }
+            
             completeGame(gameId) {
                 console.log(`✅ 遊戲完成: ${gameId}`);
                 window.gameState.gameProgress[gameId].completed = true;
                 
-                // 解鎖下一個遊戲
+                // 解鎖下一個遊戲 - 修復自動解鎖問題
                 const gameOrder = ['wordSearch', 'fallingWords', 'multipleChoice', 'bossFight'];
                 const currentIndex = gameOrder.indexOf(gameId);
                 if (currentIndex >= 0 && currentIndex < gameOrder.length - 1) {
                     const nextGame = gameOrder[currentIndex + 1];
                     window.gameState.gameProgress[nextGame].unlocked = true;
                     console.log(`🔓 已解鎖: ${nextGame}`);
+                    
+                    this.showMessage(`🎉 ${gameId} 完成！${nextGame} 已解鎖！`, 'success', 4000);
+                } else {
+                    this.showMessage(`🎉 ${gameId} 完成！`, 'success', 3000);
                 }
                 
-                this.showMessage(`🎉 ${gameId} 完成！下一個遊戲已解鎖！`, 'success');
-                
+                // 自動返回選單並更新進度
                 setTimeout(() => {
                     this.showGameMenu();
                 }, 3000);
+            }
+            
+            resetAllProgress() {
+                window.gameState.gameProgress = {
+                    wordSearch: { completed: false, unlocked: true },
+                    fallingWords: { completed: false, unlocked: false },
+                    multipleChoice: { completed: false, unlocked: false },
+                    bossFight: { completed: false, unlocked: false }
+                };
+                this.showMessage('🔄 進度已重置！', 'info');
+                this.showGameMenu();
             }
             
             showInstructions() {
@@ -1342,6 +1624,7 @@
                     if (this.progress.t >= 3 && this.progress.d >= 3 && this.progress.id >= 3) {
                         setTimeout(() => {
                             window.gameSystem.showMessage('🎉 橋樑修復完成！遊戲通關！', 'success', 4000);
+                            // 修復：確保自動解鎖下一個遊戲
                             window.gameSystem.completeGame('wordSearch');
                         }, 1000);
                     }
@@ -1380,6 +1663,310 @@
                     utterance.rate = 0.8;
                     window.speechSynthesis.speak(utterance);
                 }
+            }
+        }
+        
+        // 落字遊戲邏輯
+        class FallingWordsGameLogic {
+            constructor() {
+                this.canvas = null;
+                this.ctx = null;
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.score = 0;
+                this.timeLeft = 60;
+                this.targetSound = 't';
+                this.fallingWords = [];
+                this.gameTimer = null;
+                this.spawnTimer = null;
+                
+                this.wordDatabase = {
+                    t: ['watched', 'kicked', 'helped', 'worked', 'washed'],
+                    d: ['played', 'lived', 'moved', 'loved', 'opened'],
+                    id: ['wanted', 'needed', 'decided', 'started', 'ended']
+                };
+            }
+            
+            init() {
+                this.canvas = document.getElementById('fallingWordsCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                
+                // 設置按鈕
+                document.getElementById('startFallingBtn').onclick = () => this.startGame();
+                document.getElementById('pauseFallingBtn').onclick = () => this.togglePause();
+                document.getElementById('playAgainBtn').onclick = () => this.resetGame();
+                
+                // 發音選擇
+                document.querySelectorAll('.falling-sound-btn').forEach(btn => {
+                    btn.onclick = () => {
+                        document.querySelectorAll('.falling-sound-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        this.targetSound = btn.dataset.sound;
+                        document.getElementById('fallingTarget').textContent = `/${btn.dataset.sound}/ 音`;
+                    };
+                });
+                
+                // 點擊畫布事件
+                this.canvas.onclick = (e) => this.handleClick(e);
+                
+                // 初始化第一個目標
+                document.querySelector('.falling-sound-btn').click();
+            }
+            
+            startGame() {
+                this.isPlaying = true;
+                this.isPaused = false;
+                this.score = 0;
+                this.timeLeft = 60;
+                this.fallingWords = [];
+                
+                document.getElementById('startFallingBtn').disabled = true;
+                document.getElementById('pauseFallingBtn').disabled = false;
+                document.getElementById('fallingGameOver').style.display = 'none';
+                
+                this.gameTimer = setInterval(() => this.updateGame(), 1000/60); // 60 FPS
+                this.spawnTimer = setInterval(() => this.spawnWord(), 2000); // 每2秒生成一個單詞
+                
+                console.log('⚔️ 落字遊戲開始');
+            }
+            
+            updateGame() {
+                if (this.isPaused) return;
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 更新時間
+                this.timeLeft -= 1/60;
+                document.getElementById('fallingTime').textContent = Math.ceil(this.timeLeft);
+                
+                // 更新分數
+                document.getElementById('fallingScore').textContent = this.score;
+                
+                // 更新落字
+                for (let i = this.fallingWords.length - 1; i >= 0; i--) {
+                    const word = this.fallingWords[i];
+                    word.y += word.speed;
+                    
+                    // 繪製單詞
+                    this.drawWord(word);
+                    
+                    // 移除超出畫面的單詞
+                    if (word.y > this.canvas.height) {
+                        this.fallingWords.splice(i, 1);
+                    }
+                }
+                
+                // 檢查遊戲結束
+                if (this.timeLeft <= 0) {
+                    this.endGame();
+                }
+            }
+            
+            drawWord(word) {
+                this.ctx.font = '20px Arial';
+                this.ctx.textAlign = 'center';
+                
+                // 背景
+                const colors = { t: '#3498db', d: '#e74c3c', id: '#2ecc71' };
+                this.ctx.fillStyle = colors[word.type];
+                this.ctx.fillRect(word.x - 40, word.y - 15, 80, 30);
+                
+                // 文字
+                this.ctx.fillStyle = 'white';
+                this.ctx.fillText(word.text, word.x, word.y + 5);
+            }
+            
+            spawnWord() {
+                if (!this.isPlaying || this.isPaused) return;
+                
+                const types = ['t', 'd', 'id'];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                const words = this.wordDatabase[randomType];
+                const randomWord = words[Math.floor(Math.random() * words.length)];
+                
+                this.fallingWords.push({
+                    text: randomWord,
+                    type: randomType,
+                    x: Math.random() * (this.canvas.width - 100) + 50,
+                    y: -30,
+                    speed: 1 + Math.random() * 2
+                });
+            }
+            
+            handleClick(e) {
+                if (!this.isPlaying || this.isPaused) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+                
+                for (let i = this.fallingWords.length - 1; i >= 0; i--) {
+                    const word = this.fallingWords[i];
+                    
+                    if (clickX >= word.x - 40 && clickX <= word.x + 40 &&
+                        clickY >= word.y - 15 && clickY <= word.y + 15) {
+                        
+                        if (word.type === this.targetSound) {
+                            this.score += 10;
+                            window.gameSystem.showMessage(`✅ 正確！+10 分`, 'success', 1000);
+                        } else {
+                            this.score -= 5;
+                            window.gameSystem.showMessage(`❌ 錯誤！-5 分`, 'error', 1000);
+                        }
+                        
+                        this.fallingWords.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                document.getElementById('pauseFallingBtn').textContent = this.isPaused ? '▶️ 繼續' : '⏸️ 暫停';
+            }
+            
+            endGame() {
+                this.isPlaying = false;
+                clearInterval(this.gameTimer);
+                clearInterval(this.spawnTimer);
+                
+                document.getElementById('startFallingBtn').disabled = false;
+                document.getElementById('pauseFallingBtn').disabled = true;
+                document.getElementById('finalScore').textContent = `最終得分: ${this.score}`;
+                document.getElementById('fallingGameOver').style.display = 'block';
+                
+                if (this.score >= 100) {
+                    window.gameSystem.showMessage('🎉 達到目標分數！遊戲完成！', 'success');
+                    window.gameSystem.completeGame('fallingWords');
+                }
+                
+                console.log('⚔️ 落字遊戲結束，得分:', this.score);
+            }
+            
+            resetGame() {
+                this.endGame();
+                this.score = 0;
+                this.timeLeft = 60;
+                this.fallingWords = [];
+                document.getElementById('fallingGameOver').style.display = 'none';
+                this.startGame();
+            }
+        }
+        
+        // 選擇題遊戲邏輯
+        class MultipleChoiceGameLogic {
+            constructor() {
+                this.currentQuestion = 0;
+                this.totalQuestions = 10;
+                this.score = 0;
+                this.questions = [];
+                
+                this.wordDatabase = {
+                    t: ['watched', 'kicked', 'helped', 'worked', 'washed', 'passed', 'crossed', 'danced'],
+                    d: ['played', 'lived', 'moved', 'loved', 'opened', 'closed', 'turned', 'learned'],
+                    id: ['wanted', 'needed', 'decided', 'started', 'ended', 'visited', 'created', 'painted']
+                };
+            }
+            
+            init() {
+                this.generateQuestions();
+                this.setupControls();
+                this.showQuestion();
+            }
+            
+            generateQuestions() {
+                const allWords = [];
+                Object.keys(this.wordDatabase).forEach(type => {
+                    this.wordDatabase[type].forEach(word => {
+                        allWords.push({ word, type });
+                    });
+                });
+                
+                // 隨機選擇10個問題
+                for (let i = 0; i < this.totalQuestions; i++) {
+                    const randomIndex = Math.floor(Math.random() * allWords.length);
+                    this.questions.push(allWords[randomIndex]);
+                    allWords.splice(randomIndex, 1);
+                }
+                
+                console.log('🧙‍♂️ 生成選擇題:', this.questions);
+            }
+            
+            setupControls() {
+                document.getElementById('mcPlayBtn').onclick = () => this.playWordSound();
+                
+                document.querySelectorAll('.mc-option').forEach(btn => {
+                    btn.onclick = () => this.selectAnswer(btn.dataset.answer);
+                });
+            }
+            
+            showQuestion() {
+                if (this.currentQuestion >= this.totalQuestions) {
+                    this.endGame();
+                    return;
+                }
+                
+                const question = this.questions[this.currentQuestion];
+                document.getElementById('mcWord').textContent = question.word.toUpperCase();
+                document.getElementById('mcProgress').textContent = `問題 ${this.currentQuestion + 1} / ${this.totalQuestions}`;
+                
+                // 重置選項樣式
+                document.querySelectorAll('.mc-option').forEach(btn => {
+                    btn.style.background = btn.style.background.replace('0.8', '0.2');
+                    btn.disabled = false;
+                });
+            }
+            
+            playWordSound() {
+                const question = this.questions[this.currentQuestion];
+                if (window.speechSynthesis) {
+                    const utterance = new SpeechSynthesisUtterance(question.word);
+                    utterance.lang = 'en-US';
+                    utterance.rate = 0.8;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+            
+            selectAnswer(answer) {
+                const question = this.questions[this.currentQuestion];
+                const isCorrect = answer === question.type;
+                
+                // 高亮正確答案
+                document.querySelectorAll('.mc-option').forEach(btn => {
+                    btn.disabled = true;
+                    if (btn.dataset.answer === question.type) {
+                        btn.style.background = btn.style.background.replace('0.2', '0.8');
+                    }
+                });
+                
+                if (isCorrect) {
+                    this.score++;
+                    window.gameSystem.showMessage('✅ 正確！', 'success', 1500);
+                } else {
+                    window.gameSystem.showMessage(`❌ 錯誤！正確答案是 /${question.type}/ 音`, 'error', 2000);
+                }
+                
+                document.getElementById('mcScore').innerHTML = `得分: <span style="color: #4ecca3;">${this.score}</span> / ${this.totalQuestions}`;
+                
+                this.currentQuestion++;
+                setTimeout(() => this.showQuestion(), 2500);
+            }
+            
+            endGame() {
+                const percentage = (this.score / this.totalQuestions) * 100;
+                
+                if (percentage >= 70) {
+                    window.gameSystem.showMessage(`🎉 測驗完成！得分: ${this.score}/${this.totalQuestions} (${percentage.toFixed(0)}%)`, 'success', 4000);
+                    window.gameSystem.completeGame('multipleChoice');
+                } else {
+                    window.gameSystem.showMessage(`📚 需要更多練習！得分: ${this.score}/${this.totalQuestions} (${percentage.toFixed(0)}%)`, 'warning', 4000);
+                }
+                
+                console.log('🧙‍♂️ 選擇題遊戲結束，得分:', this.score);
+                
+                setTimeout(() => {
+                    window.gameSystem.showGameMenu();
+                }, 4000);
             }
         }
         
