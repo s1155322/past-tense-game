@@ -52,4 +52,4 @@ class GameSystem {
                     },
                     games: {
                         wordSearch: '單詞探索',
-                    
+                    }
