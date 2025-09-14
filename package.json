@@ -1,9 +1,0 @@
-{
-  "name": "past-tense-game",
-  "version": "1.0.0",
-  "description": "English Past Tense Pronunciation Learning Game",
-  "main": "index.html",
-  "scripts": {
-    "start": "node server.js"
-  }
-}
