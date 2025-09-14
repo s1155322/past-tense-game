@@ -290,38 +290,172 @@ class GameSystem {
                this.artifacts.knowledgeGem.obtained;
     }
     
-    autoProgressToNextStage(completedGame) {
-        const nextGames = {
-            wordSearch: 'fallingWords',
-            fallingWords: 'multipleChoice', 
-            multipleChoice: 'bossFight'
-        };
-        
-        const nextGame = nextGames[completedGame];
-        
-        if (nextGame) {
-            console.log('Auto-progressing to:', nextGame);
+showStageTransition(completedGame, nextGame) {
+    // Create transition cutscene
+    const transitionDiv = document.createElement('div');
+    transitionDiv.id = 'stageTransition';
+    transitionDiv.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeIn 0.5s ease-out;
+    `;
+    
+    const stageNames = {
+        wordSearch: '石橋修復',
+        fallingWords: '石塊斬擊',
+        multipleChoice: '催眠破解',
+        bossFight: '最終Boss戰'
+    };
+    
+    const stageIcons = {
+        wordSearch: '🌉',
+        fallingWords: '⚔️',
+        multipleChoice: '🧙‍♂️',
+        bossFight: '👑'
+    };
+    
+    const artifactIcons = {
+        wordSearch: '👁',
+        fallingWords: '⏰',
+        multipleChoice: '💎'
+    };
+    
+    const completedStageName = stageNames[completedGame] || '階段';
+    const nextStageName = stageNames[nextGame] || '下一階段';
+    const completedIcon = stageIcons[completedGame] || '✅';
+    const nextIcon = stageIcons[nextGame] || '➡️';
+    const artifactIcon = artifactIcons[completedGame] || '🏆';
+    
+    transitionDiv.innerHTML = `
+        <div class="transition-content" style="text-align: center; color: white; max-width: 700px; padding: 40px;">
             
-            if (nextGame === 'bossFight' && !this.canAccessBoss()) {
-                this.showMessage('🔒 需要收集所有神器才能挑戰Boss！', 3000);
-                this.showGameMenu();
-            } else {
-                const stageNames = {
-                    fallingWords: '石塊斬擊挑戰',
-                    multipleChoice: '催眠術破解',
-                    bossFight: '最終Boss戰'
-                };
-                
-                this.showMessage(`⚡ 準備進入: ${stageNames[nextGame]}`, 2000);
-                
-                setTimeout(() => {
-                    this.startGame(nextGame);
-                }, 2000);
-            }
-        } else {
-            this.showGameMenu();
+            <!-- Completed stage -->
+            <div class="completed-stage" style="margin-bottom: 40px;">
+                <div style="font-size: 80px; margin: 20px 0; animation: bounceIn 1s ease-out;">
+                    ${completedIcon}
+                </div>
+                <h2 style="font-size: 32px; margin: 20px 0; color: #4ecca3;">
+                    ${completedStageName}完成！
+                </h2>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <p style="font-size: 18px; margin: 10px 0;">🎉 恭喜獲得神器：</p>
+                    <div style="font-size: 48px; margin: 15px 0;">${artifactIcon}</div>
+                </div>
+            </div>
+            
+            <!-- Progress arrow -->
+            <div style="font-size: 40px; margin: 30px 0; animation: pulse 2s ease-in-out infinite;">
+                ⬇️
+            </div>
+            
+            <!-- Next stage -->
+            <div class="next-stage" style="margin-top: 40px;">
+                <div style="font-size: 60px; margin: 20px 0; animation: slideInUp 1s ease-out 0.5s both;">
+                    ${nextIcon}
+                </div>
+                <h3 style="font-size: 24px; margin: 20px 0; color: #fbbf24;">
+                    準備進入：${nextStageName}
+                </h3>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin: 20px 0;">
+                    <p style="font-size: 16px; margin: 5px 0;">自動進入倒數：<span id="countdown" style="color: #4ecca3; font-weight: bold;">3</span>秒</p>
+                </div>
+            </div>
+            
+            <!-- Control buttons -->
+            <div style="margin-top: 30px;">
+                <button id="continueNow" style="
+                    background: #4ecca3; color: white; border: none; padding: 15px 30px; 
+                    border-radius: 10px; font-size: 18px; cursor: pointer; margin: 0 10px;">
+                    立即繼續 →
+                </button>
+                <button id="backToMenu" style="
+                    background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
+                    padding: 15px 30px; border-radius: 10px; font-size: 18px; cursor: pointer; margin: 0 10px;">
+                    返回選單
+                </button>
+            </div>
+        </div>
+        
+        <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slideInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        </style>
+    `;
+    
+    document.body.appendChild(transitionDiv);
+    
+    // Setup countdown
+    let countdown = 3;
+    const countdownElement = document.getElementById('countdown');
+    
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdownElement) {
+            countdownElement.textContent = countdown;
+        }
+        
+        if (countdown <= 0) {
+            clearInterval(countdownInterval);
+            this.proceedToNextGame(nextGame);
+            this.removeTransition();
+        }
+    }, 1000);
+    
+    // Setup button events
+    document.getElementById('continueNow').addEventListener('click', () => {
+        clearInterval(countdownInterval);
+        this.proceedToNextGame(nextGame);
+        this.removeTransition();
+    });
+    
+    document.getElementById('backToMenu').addEventListener('click', () => {
+        clearInterval(countdownInterval);
+        this.removeTransition();
+        this.showGameMenu();
+    });
+}
+
+// 添加這個輔助方法：
+
+proceedToNextGame(nextGame) {
+    console.log('Proceeding to next game:', nextGame);
+    
+    if (nextGame === 'bossFight' && !this.canAccessBoss()) {
+        this.showMessage('🔒 需要收集所有三個神器才能挑戰Boss！', 3000);
+        setTimeout(() => this.showGameMenu(), 3000);
+    } else {
+        // Small delay before starting next game
+        setTimeout(() => {
+            this.startGame(nextGame);
+        }, 500);
     }
+}
+
+// 添加這個輔助方法：
+
+removeTransition() {
+    const transition = document.getElementById('stageTransition');
+    if (transition && transition.parentNode) {
+        document.body.removeChild(transition);
+    }
+}
     
     updateUI() {
         this.updateScoreDisplay();
