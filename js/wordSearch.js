@@ -1,307 +1,518 @@
 /**
- * Game System - Core game management system
- * Handles navigation, state management, and game coordination
+ * WordSearch.js - Word Search Game Logic
+ * Handles the bridge repair mini-game with reusable letters
+ * Only uses 4 directions: left/right/up/down (no diagonals)
  */
-class GameSystem {
+class WordSearchGame {
     constructor() {
-        this.currentGame = null;
-        this.gameInstances = {};
-        this.score = 0;
-        this.level = 1;
-        this.gameProgress = {
-            wordSearch: { completed: false, score: 0 },
-            fallingWords: { completed: false, score: 0 },
-            multipleChoice: { completed: false, score: 0 },
-            bossFight: { completed: false, score: 0 }
+        this.selectedSound = null;
+        this.selectedCells = [];
+        this.foundWords = { t: [], d: [], id: [] };
+        this.progress = { t: 0, d: 0, id: 0 };
+        this.boardSize = 12;
+        this.gameBoard = [];
+        this.isSelecting = false;
+        this.startCell = null;
+        
+        // Word database with past tense words
+        this.wordDatabase = {
+            t: ['WATCHED', 'KICKED', 'HELPED', 'WORKED', 'WASHED', 'PASSED', 'CROSSED', 'DANCED'],
+            d: ['PLAYED', 'LIVED', 'MOVED', 'LOVED', 'OPENED', 'CLOSED', 'TURNED', 'LEARNED'],
+            id: ['WANTED', 'NEEDED', 'DECIDED', 'STARTED', 'ENDED', 'VISITED', 'CREATED', 'PAINTED']
         };
         
-        console.log('🎮 GameSystem initialized');
-        this.init();
+        this.targetWords = [];
+        this.foundWordPositions = []; // Track found word positions for visual feedback
+        
+        console.log('🔍 WordSearch game initialized');
     }
     
+    /**
+     * Initialize the word search game
+     */
     init() {
-        this.setupEventListeners();
-        this.showMainMenu();
+        console.log('🎮 Starting Word Search game logic');
+        this.generateBoard();
+        this.renderBoard();
+        this.setupControls();
+        this.setupUI();
     }
     
-    setupEventListeners() {
-        console.log('🔧 Setting up GameSystem event listeners');
+    /**
+     * Generate the game board with words placed only horizontally and vertically
+     */
+    generateBoard() {
+        // Initialize empty board
+        this.gameBoard = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(''));
         
-        // Main menu buttons
-        document.getElementById('startGame').addEventListener('click', () => {
-            console.log('Start game clicked');
-            this.showStory();
-        });
-        
-        document.getElementById('instructionsBtn').addEventListener('click', () => {
-            this.showInstructions();
-        });
-        
-        document.getElementById('creditsBtn').addEventListener('click', () => {
-            this.showCredits();
-        });
-        
-        // Game menu buttons
-        document.getElementById('gameMenuBackBtn').addEventListener('click', () => {
-            this.showMainMenu();
-        });
-        
-        // Game selection buttons
-        document.querySelectorAll('.menu-button[data-game]').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const gameType = e.currentTarget.dataset.game;
-                console.log('Game selected:', gameType);
-                this.startGame(gameType);
+        // Prepare target words (4 words per type)
+        Object.keys(this.wordDatabase).forEach(type => {
+            this.wordDatabase[type].slice(0, 4).forEach(word => {
+                this.targetWords.push({ word, type });
             });
         });
-    }
-    
-    showMainMenu() {
-        console.log('📋 Showing main menu');
-        this.hideAllScreens();
-        document.getElementById('mainMenu').style.display = 'flex';
-        this.currentGame = null;
-    }
-    
-    showStory() {
-        console.log('📖 Showing story');
-        this.hideAllScreens();
-        const storyContainer = document.getElementById('storyContainer');
-        if (storyContainer) {
-            storyContainer.classList.add('active');
-            
-            // Auto-play video if available
-            const video = document.getElementById('introVideo');
-            if (video && video.canPlayType) {
-                video.play().catch(() => {
-                    console.log('Video autoplay blocked - user interaction required');
-                });
+        
+        // Place words on the board
+        let placedCount = 0;
+        this.targetWords.forEach(wordObj => {
+            if (this.placeWord(wordObj.word)) {
+                placedCount++;
             }
-        } else {
-            // Skip to game menu if no video
-            this.showGameMenu();
-        }
-    }
-    
-    showGameMenu() {
-        console.log('🎮 Showing game menu');
-        this.hideAllScreens();
-        const gameMenu = document.getElementById('gameMenu');
-        if (gameMenu) {
-            gameMenu.classList.add('active');
-        }
-        this.currentGame = null;
-    }
-    
-    startGame(gameType) {
-        console.log(`🚀 Starting game: ${gameType}`);
-        this.hideAllScreens();
-        this.currentGame = gameType;
-        
-        // Show the game container
-        const gameContainer = document.getElementById(gameType);
-        if (gameContainer) {
-            gameContainer.classList.add('active');
-            
-            // Initialize the specific game
-            this.initializeGame(gameType);
-        } else {
-            console.error(`Game container not found: ${gameType}`);
-            this.showMessage('Game not found!', 'error');
-            this.showGameMenu();
-        }
-    }
-    
-    initializeGame(gameType) {
-        console.log(`🎯 Initializing game: ${gameType}`);
-        
-        // Dispatch game initialization event
-        const event = new CustomEvent('gameInitialize', {
-            detail: { gameType: gameType }
         });
-        document.dispatchEvent(event);
         
-        // Store reference to game instance
-        if (window[gameType + 'Game']) {
-            this.gameInstances[gameType] = window[gameType + 'Game'];
-        }
-    }
-    
-    showInstructions() {
-        this.showMessage('Instructions: Find past tense words and classify their pronunciation!', 'info', 5000);
-    }
-    
-    showCredits() {
-        this.showMessage('Created with ❤️ for English learning', 'info', 3000);
-    }
-    
-    hideAllScreens() {
-        // Hide main menu
-        document.getElementById('mainMenu').style.display = 'none';
-        
-        // Hide game menu
-        const gameMenu = document.getElementById('gameMenu');
-        if (gameMenu) {
-            gameMenu.classList.remove('active');
+        // Fill empty cells with random letters
+        for (let row = 0; row < this.boardSize; row++) {
+            for (let col = 0; col < this.boardSize; col++) {
+                if (this.gameBoard[row][col] === '') {
+                    this.gameBoard[row][col] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                }
+            }
         }
         
-        // Hide story container
-        const storyContainer = document.getElementById('storyContainer');
-        if (storyContainer) {
-            storyContainer.classList.remove('active');
-        }
-        
-        // Hide all game containers
-        document.querySelectorAll('.game-container').forEach(container => {
-            container.classList.remove('active');
-        });
+        console.log(`✅ Board generated with ${placedCount} words placed`);
     }
     
-    updateScore(gameType, score, completed = false) {
-        console.log(`📊 Updating score for ${gameType}: ${score}`);
+    /**
+     * Place a word on the board using only 4 directions
+     */
+    placeWord(word) {
+        // Only 4 directions: left, right, up, down
+        const directions = [
+            [0, 1],   // Right →
+            [0, -1],  // Left ←
+            [1, 0],   // Down ↓
+            [-1, 0]   // Up ↑
+        ];
         
-        if (this.gameProgress[gameType]) {
-            this.gameProgress[gameType].score = score;
-            this.gameProgress[gameType].completed = completed;
+        for (let attempt = 0; attempt < 100; attempt++) {
+            const dir = directions[Math.floor(Math.random() * directions.length)];
+            const row = Math.floor(Math.random() * this.boardSize);
+            const col = Math.floor(Math.random() * this.boardSize);
             
-            // Update total score
-            this.score = Object.values(this.gameProgress).reduce((total, game) => total + game.score, 0);
+            if (this.canPlaceWord(word, row, col, dir)) {
+                // Place the word
+                for (let i = 0; i < word.length; i++) {
+                    const r = row + dir[0] * i;
+                    const c = col + dir[1] * i;
+                    this.gameBoard[r][c] = word[i];
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Check if a word can be placed at the given position and direction
+     */
+    canPlaceWord(word, row, col, dir) {
+        for (let i = 0; i < word.length; i++) {
+            const r = row + dir[0] * i;
+            const c = col + dir[1] * i;
             
-            // Dispatch score update event
-            const event = new CustomEvent('scoreUpdate', {
-                detail: { gameType, score, totalScore: this.score, completed }
-            });
-            document.dispatchEvent(event);
+            // Check bounds
+            if (r < 0 || r >= this.boardSize || c < 0 || c >= this.boardSize) {
+                return false;
+            }
+            
+            // Check if cell is empty or already has the same letter
+            if (this.gameBoard[r][c] !== '' && this.gameBoard[r][c] !== word[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Render the game board to the DOM
+     */
+    renderBoard() {
+        const grid = document.getElementById('letterGrid');
+        if (!grid) {
+            console.error('Letter grid element not found');
+            return;
+        }
+        
+        grid.innerHTML = '';
+        grid.className = 'letter-grid';
+        
+        // Create grid cells
+        for (let row = 0; row < this.boardSize; row++) {
+            for (let col = 0; col < this.boardSize; col++) {
+                const cell = this.createCell(row, col, this.gameBoard[row][col]);
+                grid.appendChild(cell);
+            }
+        }
+        
+        // Add global mouse events for selection
+        document.addEventListener('mouseup', () => this.endSelection());
+        
+        console.log('✅ Board rendered successfully');
+    }
+    
+    /**
+     * Create a single letter cell
+     */
+    createCell(row, col, letter) {
+        const cell = document.createElement('div');
+        cell.className = 'letter-cell';
+        cell.textContent = letter;
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        
+        // Add mouse event listeners for selection
+        cell.addEventListener('mousedown', (e) => this.startSelection(row, col, e));
+        cell.addEventListener('mouseenter', (e) => this.continueSelection(row, col, e));
+        cell.addEventListener('mouseup', (e) => this.endSelection(row, col, e));
+        
+        return cell;
+    }
+    
+    /**
+     * Start cell selection
+     */
+    startSelection(row, col, e) {
+        e.preventDefault();
+        this.isSelecting = true;
+        this.startCell = { row, col };
+        this.clearSelection();
+        this.selectCell(row, col);
+        
+        // Play click sound
+        if (window.audioManager) {
+            window.audioManager.playClick();
         }
     }
     
-    completeGame(gameType) {
-        console.log(`✅ Game completed: ${gameType}`);
-        this.updateScore(gameType, this.gameProgress[gameType].score, true);
+    /**
+     * Continue selection while dragging
+     */
+    continueSelection(row, col, e) {
+        if (!this.isSelecting || !this.startCell) return;
         
-        // Show completion message
-        this.showMessage(`🎉 ${gameType} completed!`, 'success');
+        // Clear previous selection and select new line
+        this.clearSelection();
+        this.selectLine(this.startCell, { row, col });
+    }
+    
+    /**
+     * End selection
+     */
+    endSelection(row, col, e) {
+        this.isSelecting = false;
+    }
+    
+    /**
+     * Select a line of cells (only horizontal or vertical)
+     */
+    selectLine(start, end) {
+        const dx = end.col - start.col;
+        const dy = end.row - start.row;
         
-        // Check if all games are completed
-        const allCompleted = Object.values(this.gameProgress).every(game => game.completed);
-        if (allCompleted) {
-            setTimeout(() => {
-                this.showFinalVictory();
-            }, 2000);
-        } else {
-            setTimeout(() => {
-                this.showGameMenu();
-            }, 2000);
+        // Force horizontal or vertical selection only
+        if (Math.abs(dx) > 0 && Math.abs(dy) > 0) {
+            // If diagonal, choose the dominant direction
+            if (Math.abs(dx) > Math.abs(dy)) {
+                end.row = start.row; // Make horizontal
+            } else {
+                end.col = start.col; // Make vertical
+            }
         }
-    }
-    
-    showFinalVictory() {
-        console.log('🏆 Showing final victory');
-        this.showMessage(`🏆 Congratulations! All games completed! Final score: ${this.score}`, 'success', 5000);
-        setTimeout(() => {
-            this.resetProgress();
-            this.showMainMenu();
-        }, 5000);
-    }
-    
-    resetProgress() {
-        console.log('🔄 Resetting game progress');
-        this.score = 0;
-        this.level = 1;
-        Object.keys(this.gameProgress).forEach(gameType => {
-            this.gameProgress[gameType] = { completed: false, score: 0 };
-        });
-    }
-    
-    showMessage(text, type = 'success', duration = 3000) {
-        // Use the global showMessage function
-        if (window.showMessage) {
-            window.showMessage(text, type, duration);
-        } else {
-            console.log(`Message: ${text}`);
-        }
-    }
-    
-    // Utility methods for games
-    playSound(soundType) {
-        const audioMap = {
-            correct: 'correctSound',
-            wrong: 'wrongSound',
-            bgm: 'bgmAudio'
-        };
         
-        const audioId = audioMap[soundType];
-        if (audioId) {
-            const audio = document.getElementById(audioId);
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(() => {
-                    console.log('Audio play blocked - user interaction required');
-                });
+        const distance = Math.max(Math.abs(end.col - start.col), Math.abs(end.row - start.row));
+        
+        if (distance === 0) {
+            this.selectCell(start.row, start.col);
+            return;
+        }
+        
+        const stepX = end.col === start.col ? 0 : (end.col - start.col) / distance;
+        const stepY = end.row === start.row ? 0 : (end.row - start.row) / distance;
+        
+        // Select all cells in the line
+        for (let i = 0; i <= distance; i++) {
+            const row = start.row + Math.round(stepY * i);
+            const col = start.col + Math.round(stepX * i);
+            
+            if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
+                this.selectCell(row, col);
             }
         }
     }
     
-    speakText(text, lang = 'en-US') {
-        if (window.speechSynthesis) {
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang;
+    /**
+     * Select a single cell (allows reuse of letters)
+     */
+    selectCell(row, col) {
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        if (cell) {
+            cell.classList.add('selected');
+            this.selectedCells.push({ row, col });
+        }
+        this.updateSelectedWord();
+    }
+    
+    /**
+     * Clear current selection
+     */
+    clearSelection() {
+        document.querySelectorAll('.letter-cell.selected').forEach(cell => {
+            cell.classList.remove('selected');
+        });
+        this.selectedCells = [];
+        this.updateSelectedWord();
+    }
+    
+    /**
+     * Update the displayed selected word
+     */
+    updateSelectedWord() {
+        const word = this.selectedCells.map(cell => this.gameBoard[cell.row][cell.col]).join('');
+        const selectedWordEl = document.getElementById('selectedWord');
+        
+        if (selectedWordEl) {
+            selectedWordEl.textContent = word || 'None';
+        }
+        
+        // Enable/disable control buttons
+        this.updateControlButtons(word.length >= 3);
+    }
+    
+    /**
+     * Update control button states
+     */
+    updateControlButtons(hasSelection) {
+        const confirmBtn = document.getElementById('confirmBtn');
+        const pronounceBtn = document.getElementById('pronounceBtn');
+        
+        if (confirmBtn) confirmBtn.disabled = !hasSelection;
+        if (pronounceBtn) pronounceBtn.disabled = !hasSelection;
+    }
+    
+    /**
+     * Set up game controls and UI
+     */
+    setupControls() {
+        // Sound selection buttons
+        document.querySelectorAll('.sound-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.selectSound(btn.dataset.sound));
+        });
+        
+        // Control buttons
+        const confirmBtn = document.getElementById('confirmBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const pronounceBtn = document.getElementById('pronounceBtn');
+        
+        if (confirmBtn) confirmBtn.addEventListener('click', () => this.confirmWord());
+        if (clearBtn) clearBtn.addEventListener('click', () => this.clearSelection());
+        if (pronounceBtn) pronounceBtn.addEventListener('click', () => this.pronounceWord());
+    }
+    
+    /**
+     * Set up the game UI elements
+     */
+    setupUI() {
+        this.updateProgressBars();
+        this.updateFoundWordsDisplay();
+    }
+    
+    /**
+     * Select a sound type (/t/, /d/, or /ɪd/)
+     */
+    selectSound(soundType) {
+        this.selectedSound = soundType;
+        
+        // Update button visual states
+        document.querySelectorAll('.sound-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        document.querySelector(`[data-sound="${soundType}"]`).classList.add('selected');
+        
+        // Update display
+        const selectedSoundEl = document.getElementById('selectedSound');
+        if (selectedSoundEl) {
+            const soundNames = { t: '/t/ sound', d: '/d/ sound', id: '/ɪd/ sound' };
+            selectedSoundEl.textContent = soundNames[soundType];
+        }
+        
+        if (window.audioManager) {
+            window.audioManager.playClick();
+        }
+    }
+    
+    /**
+     * Confirm the selected word
+     */
+    confirmWord() {
+        if (!this.selectedSound) {
+            this.showMessage('Please select a pronunciation type first!', 'warning');
+            return;
+        }
+        
+        const word = this.selectedCells.map(cell => this.gameBoard[cell.row][cell.col]).join('');
+        const wordObj = this.targetWords.find(w => w.word === word);
+        
+        if (wordObj && wordObj.type === this.selectedSound && !this.foundWords[wordObj.type].includes(word)) {
+            this.handleCorrectWord(wordObj, word);
+        } else if (wordObj && this.foundWords[wordObj.type].includes(word)) {
+            this.showMessage('This word has already been found!', 'warning');
+        } else {
+            this.handleIncorrectWord();
+        }
+        
+        this.clearSelection();
+    }
+    
+    /**
+     * Handle correct word selection
+     */
+    handleCorrectWord(wordObj, word) {
+        this.foundWords[wordObj.type].push(word);
+        this.progress[wordObj.type]++;
+        
+        // Mark cells as part of a found word (but still selectable)
+        this.selectedCells.forEach(cell => {
+            const cellEl = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+            cellEl.classList.add('word-found');
+            cellEl.classList.add('part-of-word');
+        });
+        
+        // Update UI
+        this.updateFoundWordsDisplay();
+        this.updateProgressBars();
+        
+        // Show success message
+        this.showMessage(`Correct! ${word.toLowerCase()} is /${wordObj.type}/ sound`, 'success');
+        
+        // Check for game completion
+        if (this.progress.t >= 3 && this.progress.d >= 3 && this.progress.id >= 3) {
+            setTimeout(() => {
+                this.completeGame();
+            }, 1000);
+        }
+    }
+    
+    /**
+     * Handle incorrect word selection
+     */
+    handleIncorrectWord() {
+        this.showMessage('Wrong! Please try again.', 'error');
+        
+        if (window.audioManager) {
+            window.audioManager.playWrong();
+        }
+    }
+    
+    /**
+     * Update progress bars
+     */
+    updateProgressBars() {
+        ['t', 'd', 'id'].forEach(type => {
+            const count = this.progress[type];
+            const percentage = (count / 3) * 100;
+            
+            const progressBar = document.getElementById(`progress${type.toUpperCase()}`);
+            const countEl = document.getElementById(`count${type.toUpperCase()}`);
+            
+            if (progressBar) progressBar.style.width = `${percentage}%`;
+            if (countEl) countEl.textContent = `${count}/3`;
+        });
+    }
+    
+    /**
+     * Update found words display
+     */
+    updateFoundWordsDisplay() {
+        ['t', 'd', 'id'].forEach(type => {
+            const container = document.getElementById(`foundWords${type.toUpperCase()}`);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            this.foundWords[type].forEach(word => {
+                const wordEl = document.createElement('div');
+                wordEl.className = 'word-item found';
+                wordEl.textContent = word.toLowerCase();
+                container.appendChild(wordEl);
+            });
+        });
+    }
+    
+    /**
+     * Pronounce the selected word
+     */
+    pronounceWord() {
+        const word = this.selectedCells.map(cell => this.gameBoard[cell.row][cell.col]).join('').toLowerCase();
+        
+        if (word && window.speechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
             utterance.rate = 0.8;
             window.speechSynthesis.speak(utterance);
         }
     }
     
-    // Game state management
-    saveGameState() {
-        const gameState = {
-            score: this.score,
-            level: this.level,
-            progress: this.gameProgress,
-            currentGame: this.currentGame
-        };
+    /**
+     * Complete the game
+     */
+    completeGame() {
+        this.showMessage('🎉 Bridge repaired! Game completed!', 'success', 4000);
         
-        try {
-            localStorage.setItem('englishGameState', JSON.stringify(gameState));
-            console.log('Game state saved');
-        } catch (e) {
-            console.log('Could not save game state');
+        // Notify game system
+        if (window.gameSystem) {
+            window.gameSystem.completeGame('wordSearch');
+        }
+        
+        if (window.audioManager) {
+            window.audioManager.playCorrect();
         }
     }
     
-    loadGameState() {
-        try {
-            const saved = localStorage.getItem('englishGameState');
-            if (saved) {
-                const gameState = JSON.parse(saved);
-                this.score = gameState.score || 0;
-                this.level = gameState.level || 1;
-                this.gameProgress = gameState.progress || this.gameProgress;
-                console.log('Game state loaded');
-                return true;
-            }
-        } catch (e) {
-            console.log('Could not load game state');
+    /**
+     * Show a message to the user
+     */
+    showMessage(text, type = 'success', duration = 3000) {
+        if (window.gameSystem && window.gameSystem.showMessage) {
+            window.gameSystem.showMessage(text, type, duration);
+        } else {
+            console.log(`${type.toUpperCase()}: ${text}`);
         }
-        return false;
     }
     
-    // Language support
-    getCurrentLanguage() {
-        return window.gameState?.currentLanguage || 'en';
+    /**
+     * Reset the game
+     */
+    reset() {
+        this.selectedSound = null;
+        this.selectedCells = [];
+        this.foundWords = { t: [], d: [], id: [] };
+        this.progress = { t: 0, d: 0, id: 0 };
+        this.targetWords = [];
+        this.foundWordPositions = [];
+        
+        this.generateBoard();
+        this.renderBoard();
+        this.setupUI();
+        
+        console.log('🔄 Word search game reset');
     }
     
-    getTranslation(key) {
-        const lang = this.getCurrentLanguage();
-        return window.translations?.[lang]?.[key] || key;
+    /**
+     * Get current game state
+     */
+    getState() {
+        return {
+            progress: this.progress,
+            foundWords: this.foundWords,
+            selectedSound: this.selectedSound,
+            completed: this.progress.t >= 3 && this.progress.d >= 3 && this.progress.id >= 3
+        };
     }
 }
 
-// Export for use in other modules
+// Make the class available globally
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GameSystem;
+    module.exports = WordSearchGame;
 }
 
-// Make available globally
-window.GameSystem = GameSystem;
-
-console.log('✅ GameSystem class loaded successfully');
+window.WordSearchGame = WordSearchGame;
+console.log('✅ WordSearch game loaded successfully');
