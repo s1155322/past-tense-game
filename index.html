@@ -1,329 +1,362 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>English Past Tense Pronunciation Games</title>
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/games.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Past Tense Pronunciation Adventure</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/games.css">
 </head>
 <body>
-
-  <!-- 設定面板 -->
-  <div id="settingsPanel" class="settings-panel">
-    <div class="settings-content">
-      <h2>⚙️</h2>
-      <h3 id="settingsTitle">遊戲設置</h3>
-
-      <div class="setting-group">
-        <label id="volumeLabel">音量</label>
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" />
-      </div>
-
-      <div class="setting-group">
-        <label id="bgmLabel">背景音樂</label>
-        <button id="bgmToggle" class="toggle-btn">ON</button>
-      </div>
-
-      <div class="setting-group">
-        <label id="sfxLabel">音效</label>
-        <button id="sfxToggle" class="toggle-btn">ON</button>
-      </div>
-
-      <div class="setting-group">
-        <label id="languageLabel">語言</label>
-        <div class="language-buttons">
-          <button class="lang-button active" data-lang="zh">中文</button>
-          <button class="lang-button" data-lang="en">English</button>
+    
+    <!-- Settings Panel -->
+    <div id="settingsPanel" class="settings-panel">
+        <div class="settings-content">
+            <h2>⚙️</h2>
+            <h3 id="settingsTitle">遊戲設置</h3>
+            
+            <div class="setting-group">
+                <label id="volumeLabel">音量</label>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            
+            <div class="setting-group">
+                <label id="bgmLabel">背景音樂</label>
+                <button id="bgmToggle" class="toggle-btn">ON</button>
+            </div>
+            
+            <div class="setting-group">
+                <label id="sfxLabel">音效</label>
+                <button id="sfxToggle" class="toggle-btn">ON</button>
+            </div>
+            
+            <div class="setting-group">
+                <label id="languageLabel">語言</label>
+                <div class="language-buttons">
+                    <button class="lang-button active" data-lang="zh">中文</button>
+                    <button class="lang-button" data-lang="en">English</button>
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <label id="screenSizeLabel">螢幕大小</label>
+                <div class="size-buttons">
+                    <button class="size-button" data-size="small">小</button>
+                    <button class="size-button active" data-size="medium">中</button>
+                    <button class="size-button" data-size="large">大</button>
+                </div>
+            </div>
+            
+            <button id="closeSettings" class="close-settings">×</button>
         </div>
-      </div>
-
-      <div class="setting-group">
-        <label id="screenSizeLabel">螢幕大小</label>
-        <div class="size-buttons">
-          <button class="size-button" data-size="small">小</button>
-          <button class="size-button active" data-size="medium">中</button>
-          <button class="size-button" data-size="large">大</button>
-        </div>
-      </div>
-
-      <button id="closeSettings" class="close-settings">×</button>
-    </div>
-  </div>
-
-  <!-- 故事/開頭影片容器 -->
-  <div id="storyContainer" class="story-container" style="display: none;">
-    <div class="video-wrapper">
-      <video id="introVideo" controls>
-        <source src="assets/video/intro.mp4" type="video/mp4" />
-        您的瀏覽器不支持 video 標籤。
-      </video>
-      <div class="story-controls">
-        <button id="skipIntro">Skip</button>
-        <button id="continueStory">Continue</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 主要遊戲容器 -->
-  <div id="gameContainer" class="container">
-
-    <!-- 主要選單 (大廳) -->
-    <div id="mainMenu" class="main-menu">
-      <h1 id="gameTitle">Language Quest Adventure</h1>
-      <div class="menu-options">
-        <button id="startGame" class="menu-btn">開始冒險</button>
-        <button id="continueGame" class="menu-btn">繼續冒險</button>
-        <button id="collectionsBtn" class="menu-btn">收藏品</button>
-        <button id="quitGame" class="menu-btn">離開遊戲</button>
-      </div>
-      <button id="settingsBtn" class="settings-btn">⚙️</button>
     </div>
 
-    <!-- 收藏品頁面 -->
-    <div id="collectionsMenu" class="collections-menu" style="display: none;">
-      <h2 id="collectionsTitle">冒險收藏品</h2>
-      <div class="collections-grid">
-        <div class="collection-item" data-artifact="explorer">
-          <div class="artifact-icon">👁</div>
-          <h3>探險者之眼</h3>
-          <p>完成單詞探索後獲得</p>
+    <!-- Story Container -->
+    <div id="storyContainer" class="story-container" style="display: none;">
+        <div class="video-wrapper">
+            <video id="introVideo" controls>
+                <source src="assets/video/intro.mp4" type="video/mp4">
+                您的瀏覽器不支援 video 標籤。
+            </video>
+            <div class="story-controls">
+                <button id="skipIntro">Skip</button>
+                <button id="continueStory">Continue</button>
+            </div>
         </div>
-        <div class="collection-item" data-artifact="timeController">
-          <div class="artifact-icon">⏰</div>
-          <h3>時間控制者</h3>
-          <p>完成時間挑戰後獲得</p>
-        </div>
-        <div class="collection-item" data-artifact="knowledgeGem">
-          <div class="artifact-icon">💎</div>
-          <h3>知識寶石</h3>
-          <p>完成知識試煉後獲得</p>
-        </div>
-      </div>
-      <button id="backToLobby" class="back-btn">返回大廳</button>
     </div>
 
-    <!-- 遊戲選單 -->
-    <div id="gameMenu" class="game-menu" style="display: none;">
-      <h1 id="gameMenuTitle">英語過去式發音學習遊戲</h1>
-
-      <div class="language-selector">
-        <button class="lang-btn active" data-lang="zh">中文</button>
-        <button class="lang-btn" data-lang="en">English</button>
-      </div>
-
-      <div class="menu">
-        <button class="menu-button" data-game="wordSearch">單詞搜索</button>
-        <button class="menu-button" data-game="fallingword">落字遊戲</button>
-        <button class="menu-button" data-game="multipleChoice">選擇題</button>
-        <button class="menu-button boss-button" data-game="BossFight">Boss戰</button>
-      </div>
-
-      <div class="sound-selection">
-        <div class="sound-buttons">
-          <button class="color-mode-button" data-sound="t">/t/</button>
-          <button class="color-mode-button" data-sound="d">/d/</button>
-          <button class="color-mode-button" data-sound="id">/id/</button>
+    <!-- Main Game Container -->
+    <div id="gameContainer" class="container">
+        
+        <!-- Main Menu -->
+        <div id="mainMenu" class="main-menu">
+            <h1 id="gameTitle">英語過去式發音冒險</h1>
+            <div class="menu-options">
+                <button id="startGame" class="menu-btn">開始冒險</button>
+                <button id="continueGame" class="menu-btn">繼續冒險</button>
+                <button id="collectionsBtn" class="menu-btn">收藏品</button>
+                <button id="quitGame" class="menu-btn">離開遊戲</button>
+            </div>
+            <button id="settingsBtn" class="settings-btn">⚙️</button>
         </div>
-        <div class="selected-sound">選擇的發音類型: <span id="selectedSound">none</span></div>
-      </div>
 
-      <div class="game-stats">
-        <div class="stat">分數: <span id="totalScore">0</span></div>
-        <div class="stat">階段: <span id="currentStage">1</span></div>
-      </div>
+        <!-- Collections Menu -->
+        <div id="collectionsMenu" class="collections-menu" style="display: none;">
+            <h2 id="collectionsTitle">冒險收藏品</h2>
+            <div class="collections-grid">
+                <div class="collection-item" data-artifact="explorer">
+                    <div class="artifact-icon">👁</div>
+                    <h3>探險者之眼</h3>
+                    <p>完成單詞探索後獲得</p>
+                </div>
+                <div class="collection-item" data-artifact="timeController">
+                    <div class="artifact-icon">⏰</div>
+                    <h3>時間控制者</h3>
+                    <p>完成時間挑戰後獲得</p>
+                </div>
+                <div class="collection-item" data-artifact="knowledgeGem">
+                    <div class="artifact-icon">💎</div>
+                    <h3>知識寶石</h3>
+                    <p>完成知識試煉後獲得</p>
+                </div>
+            </div>
+            <button class="back-btn" onclick="window.gameSystem?.showMainMenu()">返回大廳</button>
+        </div>
 
-      <button id="backToMainMenu" class="back-btn">返回大廳</button>
+        <!-- Game Menu -->
+        <div id="gameMenu" class="game-menu" style="display: none;">
+            <h1 id="gameMenuTitle">選擇遊戲</h1>
+            
+            <div class="language-selector">
+                <button class="lang-btn active" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="en">English</button>
+            </div>
+
+            <div class="menu">
+                <button class="menu-button" data-game="wordSearch">
+                    <h3>單詞搜索</h3>
+                    <p>在網格中找到過去式單詞</p>
+                </button>
+                <button class="menu-button" data-game="fallingword">
+                    <h3>落字遊戲</h3>
+                    <p>用劍斬開正確發音的石塊</p>
+                </button>
+                <button class="menu-button" data-game="multipleChoice">
+                    <h3>選擇題</h3>
+                    <p>聽發音選擇正確類型</p>
+                </button>
+                <button class="menu-button boss-button" data-game="BossFight">
+                    <h3>Boss戰</h3>
+                    <p>擊敗發音之王！</p>
+                </button>
+            </div>
+
+            <div class="game-stats">
+                <div class="stat">總分數: <span id="totalScore">0</span></div>
+                <div class="stat">當前階段: <span id="currentStage">1</span></div>
+            </div>
+
+            <button class="back-btn" onclick="window.gameSystem?.showMainMenu()">返回大廳</button>
+        </div>
+
+        <!-- Game 1: Word Search -->
+        <div id="wordSearch" class="game-container" style="display: none;">
+            <h2>單詞搜索遊戲</h2>
+            <div class="instructions">在網格中找到過去式單詞，選擇正確的發音類型</div>
+
+            <!-- Game 1 Cutscene -->
+            <div class="cutscene-container" id="game1Cutscene">
+                <div class="cutscene-content cliff-scene">
+                    <img src="assets/images/cliff-background.jpg" alt="懸崖場景" class="background-img">
+                    <div class="character-sprite" id="playerSprite">
+                        <img src="assets/images/player-sprite.png" alt="角色">
+                    </div>
+                    <div class="stone-bridges" id="stoneBridges"></div>
+                    <div class="cutscene-text">
+                        <p>你來到了一個懸崖邊，需要用正確的發音知識建造石橋才能通過...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sound-selection">
+                <div class="sound-buttons">
+                    <button class="color-mode-button" data-sound="t">/t/</button>
+                    <button class="color-mode-button" data-sound="d">/d/</button>
+                    <button class="color-mode-button" data-sound="id">/id/</button>
+                </div>
+                <div class="selected-sound">選擇的發音類型: <span id="selectedSound">none</span></div>
+            </div>
+
+            <div class="game-board" id="wordSearchBoard"></div>
+
+            <div class="word-lists">
+                <div class="word-list" data-sound="t">
+                    <h3>/t/ 音</h3>
+                    <div class="word-items" id="tWords"></div>
+                </div>
+                <div class="word-list" data-sound="d">
+                    <h3>/d/ 音</h3>
+                    <div class="word-items" id="dWords"></div>
+                </div>
+                <div class="word-list" data-sound="id">
+                    <h3>/id/ 音</h3>
+                    <div class="word-items" id="idWords"></div>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <div class="selected-word">選中的單詞: <span id="selectedWord"></span></div>
+                <button id="confirmWord" class="control-btn">確認</button>
+                <button id="clearSelection" class="control-btn">清除</button>
+                <button id="pronounceWord" class="control-btn">發音</button>
+            </div>
+
+            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+        </div>
+
+        <!-- Game 2: Falling Words -->
+        <div id="fallingword" class="game-container" style="display: none;">
+            <h2>落字遊戲</h2>
+            <div class="instructions">使用方向鍵移動，空白鍵攻擊正確發音的單詞</div>
+
+            <!-- Game 2 Cutscene -->
+            <div class="cutscene-container" id="game2Cutscene">
+                <div class="cutscene-content stone-rain-scene">
+                    <img src="assets/images/cave-background.jpg" alt="洞穴場景" class="background-img">
+                    <div class="character-sprite" id="swordPlayer">
+                        <img src="assets/images/warrior-sprite.png" alt="劍士">
+                    </div>
+                    <div class="falling-stones" id="fallingStones"></div>
+                    <div class="cutscene-text">
+                        <p>IPA音標石塊從天空掉落！用不同顏色的劍斬開對應的石塊！</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sound-selection">
+                <div class="sound-buttons">
+                    <button class="color-mode-button" data-sound="t">/t/</button>
+                    <button class="color-mode-button" data-sound="d">/d/</button>
+                    <button class="color-mode-button" data-sound="id">/id/</button>
+                </div>
+            </div>
+
+            <canvas id="fallingWordsCanvas" width="800" height="600"></canvas>
+            
+            <div class="game-info">
+                <div>分數: <span id="fallingScore">0</span></div>
+                <div>生命: <span id="fallingLives">3</span></div>
+            </div>
+
+            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+        </div>
+
+        <!-- Game 3: Multiple Choice -->
+        <div id="multipleChoice" class="game-container" style="display: none;">
+            <h2>選擇題遊戲</h2>
+            <div class="instructions">聽發音選擇正確的類型，連續答對5題打敗巫師！</div>
+
+            <!-- Game 3 Cutscene -->
+            <div class="cutscene-container" id="game3Cutscene">
+                <div class="cutscene-content hypnosis-scene">
+                    <img src="assets/images/wizard-lair.jpg" alt="巫師巢穴" class="background-img">
+                    <div class="character-sprite" id="hypnotizedPlayer">
+                        <img src="assets/images/player-hypnotized.png" alt="被催眠的角色">
+                    </div>
+                    <div class="character-sprite" id="evilWizard">
+                        <img src="assets/images/wizard-sprite.png" alt="邪惡巫師">
+                    </div>
+                    <div class="hypnosis-effects" id="hypnosisEffects"></div>
+                    <div class="cutscene-text">
+                        <p>你被邪惡巫師催眠了！只有連續答對5題才能打敗巫師脫困！</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-area">
+                <div class="word-display" id="questionWord">準備開始</div>
+                <button id="playPronunciation" class="pronunciation-btn">🔊 播放發音</button>
+            </div>
+
+            <div class="choices">
+                <button class="choice-button" data-sound="t">/t/</button>
+                <button class="choice-button" data-sound="d">/d/</button>
+                <button class="choice-button" data-sound="id">/id/</button>
+            </div>
+
+            <div class="progress-info">
+                <div>連續正確: <span id="correctStreak">0</span>/5</div>
+                <div>分數: <span id="multipleChoiceScore">0</span></div>
+            </div>
+
+            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+        </div>
+
+        <!-- Game 4: Boss Fight -->
+        <div id="BossFight" class="game-container" style="display: none;">
+            <h2>Boss戰</h2>
+            <div class="instructions">擊敗發音之王！答對問題攻擊Boss</div>
+
+            <!-- Boss Fight Cutscene -->
+            <div class="cutscene-container" id="bossCutscene">
+                <div class="cutscene-content boss-arena">
+                    <img src="assets/images/boss-arena.jpg" alt="Boss戰場" class="background-img">
+                    <div class="character-sprite" id="bossCharacter">
+                        <img src="assets/images/pronunciation-king.png" alt="發音之王">
+                    </div>
+                    <div class="character-sprite" id="finalPlayer">
+                        <img src="assets/images/hero-final.png" alt="最終英雄">
+                    </div>
+                    <div class="battle-effects" id="battleEffects"></div>
+                    <div class="cutscene-text">
+                        <p>最終決戰！面對強大的發音之王，運用你學到的所有知識吧！</p>
+                    </div>
+                </div>
+            </div>
+
+            <canvas id="bossCanvas" width="800" height="600"></canvas>
+            
+            <div class="boss-info">
+                <div>Boss血量: <span id="bossHealth">100</span></div>
+                <div>玩家血量: <span id="playerHealth">100</span></div>
+                <div>分數: <span id="bossScore">0</span></div>
+            </div>
+
+            <div class="question-area">
+                <div class="word-display" id="bossQuestionWord">準備戰鬥</div>
+                <button id="bossPronunciation" class="pronunciation-btn">🔊 播放發音</button>
+            </div>
+
+            <div class="choices">
+                <button class="choice-button" data-sound="t">/t/</button>
+                <button class="choice-button" data-sound="d">/d/</button>
+                <button class="choice-button" data-sound="id">/id/</button>
+            </div>
+
+            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+        </div>
+
+        <!-- Ending Container -->
+        <div id="endingContainer" class="ending-container" style="display: none;">
+            <div class="video-wrapper">
+                <video id="endingVideo" autoplay>
+                    <source src="assets/video/ending.mp4" type="video/mp4">
+                    您的瀏覽器不支援 video 標籤。
+                </video>
+                <div class="ending-controls">
+                    <button id="playAgain">再玩一次</button>
+                    <button id="backToMenu">返回主選單</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Game 1: Word Search -->
-    <div id="wordSearch" class="game-container" style="display: none;">
-      <h2>單詞搜索遊戲</h2>
-      <div class="instructions">在網格中找到過去式單詞，選擇正確的發音類型</div>
+    <!-- Audio Elements -->
+    <audio id="bgmAudio" loop>
+        <source src="assets/audio/bgm.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="correctSound">
+        <source src="assets/audio/correct.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="wrongSound">
+        <source src="assets/audio/wrong.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="clickSound">
+        <source src="assets/audio/click.mp3" type="audio/mpeg">
+    </audio>
 
-      <!-- Cutscene for Game 1 -->
-      <div class="cutscene-container" id="game1Cutscene">
-        <div class="cutscene-content cliff-scene">
-          <img src="assets/images/cliff-background.jpg" alt="懸崖場景" class="background-img" />
-          <div class="character-sprite" id="playerSprite">
-            <img src="assets/images/player-sprite.png" alt="角色" />
-          </div>
-          <div class="stone-bridges" id="stoneBridges"></div>
-          <div class="cutscene-text">
-            <p>你來到了一個懸崖邊，需要用正確的發音知識建造石橋才能通過...</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="game-board" id="wordSearchBoard"></div>
-
-      <div class="word-lists">
-        <div class="word-list" data-sound="t">
-          <h3>/t/ 音</h3>
-          <div class="word-items" id="tWords"></div>
-        </div>
-        <div class="word-list" data-sound="d">
-          <h3>/d/ 音</h3>
-          <div class="word-items" id="dWords"></div>
-        </div>
-        <div class="word-list" data-sound="id">
-          <h3>/id/ 音</h3>
-          <div class="word-items" id="idWords"></div>
-        </div>
-      </div>
-
-      <div class="game-controls">
-        <div class="selected-word">點擊字母組成單詞: <span id="selectedWord"></span></div>
-        <button id="confirmWord" class="control-btn">確認</button>
-        <button id="clearSelection" class="control-btn">清除</button>
-        <button id="pronounceWord" class="control-btn">發音</button>
-      </div>
-
-      <div class="feedback" id="feedback"></div>
-    </div>
-
-    <!-- Game 2: Falling Words -->
-    <div id="fallingword" class="game-container" style="display: none;">
-      <h2>落字遊戲</h2>
-      <div class="instructions">使用方向鍵接住正確發音的單詞</div>
-
-      <!-- Cutscene for Game 2 -->
-      <div class="cutscene-container" id="game2Cutscene">
-        <div class="cutscene-content stone-rain-scene">
-          <img src="assets/images/cave-background.jpg" alt="洞穴場景" class="background-img" />
-          <div class="character-sprite sword-wielder" id="swordPlayer">
-            <img src="assets/images/warrior-sprite.png" alt="劍士" />
-          </div>
-          <div class="falling-stones" id="fallingStones"></div>
-          <div class="cutscene-text">
-            <p>IPA音標石塊從天空掉落！用不同顏色的劍斬開對應的石塊！</p>
-          </div>
-        </div>
-      </div>
-
-      <canvas id="fallingWordsCanvas" width="800" height="600"></canvas>
-      <div class="game-info">
-        <div>分數: <span id="fallingScore">0</span></div>
-        <div>生命: <span id="fallingLives">3</span></div>
-      </div>
-    </div>
-
-    <!-- Game 3: Multiple Choice -->
-    <div id="multipleChoice" class="game-container" style="display: none;">
-      <h2>選擇題遊戲</h2>
-      <div class="instructions">聽發音選擇正確的類型</div>
-
-      <!-- Cutscene for Game 3 -->
-      <div class="cutscene-container" id="game3Cutscene">
-        <div class="cutscene-content hypnosis-scene">
-          <img src="assets/images/wizard-lair.jpg" alt="巫師巢穴" class="background-img" />
-          <div class="character-sprite hypnotized" id="hypnotizedPlayer">
-            <img src="assets/images/player-hypnotized.png" alt="被催眠的角色" />
-          </div>
-          <div class="evil-wizard" id="evilWizard">
-            <img src="assets/images/wizard-sprite.png" alt="邪惡巫師" />
-          </div>
-          <div class="hypnosis-effects" id="hypnosisEffects"></div>
-          <div class="cutscene-text">
-            <p>你被邪惡巫師催眠了！只有連續答對5題才能打敗巫師脫困！</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="question-area">
-        <div class="word-display" id="questionWord">點擊開始</div>
-        <button id="playPronunciation" class="pronunciation-btn">🔊 播放發音</button>
-      </div>
-
-      <div class="choices">
-        <button class="choice-button" data-sound="t">/t/</button>
-        <button class="choice-button" data-sound="d">/d/</button>
-        <button class="choice-button" data-sound="id">/id/</button>
-      </div>
-
-      <div class="progress-info">
-        <div>連續正確: <span id="correctStreak">0</span>/5</div>
-        <div>分數: <span id="multipleChoiceScore">0</span></div>
-      </div>
-    </div>
-
-    <!-- Boss Fight -->
-    <div id="BossFight" class="game-container" style="display: none;">
-      <h2>Boss戰</h2>
-      <div class="instructions">擊敗發音之王！</div>
-
-      <!-- Boss Fight Cutscene -->
-      <div class="cutscene-container" id="bossCutscene">
-        <div class="cutscene-content boss-arena">
-          <img src="assets/images/boss-arena.jpg" alt="Boss戰場" class="background-img" />
-          <div class="boss-character" id="bossCharacter">
-            <img src="assets/images/pronunciation-king.png" alt="發音之王" />
-          </div>
-          <div class="player-character" id="finalPlayer">
-            <img src="assets/images/hero-final.png" alt="英雄" />
-          </div>
-          <div class="battle-effects" id="battleEffects"></div>
-          <div class="cutscene-text">
-            <p>最終決戰！面對強大的發音之王，運用你學到的所有知識吧！</p>
-          </div>
-        </div>
-      </div>
-
-      <canvas id="bossCanvas" width="800" height="600"></canvas>
-      <div class="boss-info">
-        <div>Boss血量: <span id="bossHealth">100</span></div>
-        <div>玩家血量: <span id="playerHealth">100</span></div>
-        <div>分數: <span id="bossScore">0</span></div>
-      </div>
-
-      <div class="choices">
-        <button class="choice-button" data-sound="t">/t/</button>
-        <button class="choice-button" data-sound="d">/d/</button>
-        <button class="choice-button" data-sound="id">/id/</button>
-      </div>
-    </div>
-
-    <!-- Ending Video Container -->
-    <div id="endingContainer" class="ending-container" style="display: none;">
-      <div class="video-wrapper">
-        <video id="endingVideo" autoplay>
-          <source src="assets/video/ending.mp4" type="video/mp4" />
-          您的瀏覽器不支持 video 標籤。
-        </video>
-        <div class="ending-controls">
-          <button id="playAgain">再玩一次</button>
-          <button id="backToMenu">返回主選單</button>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Audio Elements -->
-  <audio id="bgmAudio" loop>
-    <source src="assets/audio/bgm.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="correctSound">
-    <source src="assets/audio/correct.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="wrongSound">
-    <source src="assets/audio/wrong.mp3" type="audio/mpeg" />
-  </audio>
-  <audio id="clickSound">
-    <source src="assets/audio/click.mp3" type="audio/mpeg" />
-  </audio>
-
-  <!-- Javascript -->
-  <script src="data/wordDatabase.js"></script>
-  <script src="js/soundSystem.js"></script>
-  <script src="js/gamesystem.js"></script>
-  <script src="js/wordSearch.js"></script>
-  <script src="js/fallingword.js"></script>
-  <script src="js/multipleChoice.js"></script>
-  <script src="js/BossFight.js"></script>
-  <script src="js/main.js"></script>
+    <!-- JavaScript Files - Correct Order and Paths -->
+    <script src="js/wordDatabase.js"></script>
+    <script src="js/soundSystem.js"></script>
+    <script src="js/gamesystem.js"></script>
+    <script src="js/wordSearch.js"></script>
+    <script src="js/fallingword.js"></script>
+    <script src="js/multipleChoice.js"></script>
+    <script src="js/BossFight.js"></script>
+    <script src="js/main.js"></script>
 
 </body>
 </html>
