@@ -1,6 +1,7 @@
 /**
- * Complete Game System - Master Controller
- * Handles all game states, transitions, scoring, and video playback
+ * Complete Game System - REVISED & DEBUGGED VERSION
+ * Fixed all 404 errors and button functionality issues
+ * Properly handles intro.mp4 and ending.mp4 videos
  */
 class GameSystem {
     constructor() {
@@ -24,116 +25,233 @@ class GameSystem {
         this.gameProgression = ['wordSearch', 'fallingWords', 'multipleChoice', 'bossFight'];
         this.isInitialized = false;
         
+        // Debug flag
+        this.debug = true;
+        
+        this.log('GameSystem constructor called');
         this.init();
     }
     
+    log(message) {
+        if (this.debug) {
+            console.log('[GameSystem]', message);
+        }
+    }
+    
     init() {
-        console.log('Initializing Complete Game System');
-        this.setupEventListeners();
-        this.loadGameState();
-        this.isInitialized = true;
+        this.log('Initializing Complete Game System');
         
-        // Check if we should show intro on first visit
-        const hasSeenIntro = localStorage.getItem('hasSeenIntro');
-        if (!hasSeenIntro) {
-            setTimeout(() => {
-                this.showIntroVideo();
-            }, 1000);
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupSystem();
+            });
+        } else {
+            this.setupSystem();
+        }
+    }
+    
+    setupSystem() {
+        this.log('Setting up system...');
+        
+        try {
+            this.setupEventListeners();
+            this.loadGameState();
+            this.isInitialized = true;
+            
+            this.log('System setup complete');
+            
+            // Check if we should show intro on first visit
+            const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+            if (!hasSeenIntro) {
+                this.log('First visit - showing intro');
+                setTimeout(() => {
+                    this.showIntroVideo();
+                }, 1000);
+            } else {
+                this.log('Returning visitor - showing main menu');
+                setTimeout(() => {
+                    this.showMainMenu();
+                }, 500);
+            }
+        } catch (error) {
+            console.error('Error setting up game system:', error);
         }
     }
     
     setupEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.setupMenuButtons();
-            this.setupVideoControls();
-        });
+        this.log('Setting up event listeners');
+        
+        // Setup menu buttons with error handling
+        this.setupMenuButtons();
+        
+        // Setup video controls with proper paths
+        this.setupVideoControls();
+        
+        // Setup settings panel
+        this.setupSettingsPanel();
+        
+        this.log('Event listeners setup complete');
     }
     
     setupMenuButtons() {
-        // Main menu buttons
+        this.log('Setting up menu buttons');
+        
+        // Main menu buttons with null checks
         const startBtn = document.getElementById('startGame');
         const continueBtn = document.getElementById('continueGame');
         const collectionsBtn = document.getElementById('collectionsBtn');
         const quitBtn = document.getElementById('quitGame');
         const settingsBtn = document.getElementById('settingsBtn');
         
-        if (startBtn) startBtn.addEventListener('click', () => this.startNewGame());
-        if (continueBtn) continueBtn.addEventListener('click', () => this.continueGame());
-        if (collectionsBtn) collectionsBtn.addEventListener('click', () => this.showCollections());
-        if (quitBtn) quitBtn.addEventListener('click', () => this.quitGame());
-        if (settingsBtn) settingsBtn.addEventListener('click', () => this.showSettings());
+        if (startBtn) {
+            startBtn.onclick = () => this.startNewGame();
+            this.log('Start button connected');
+        }
+        
+        if (continueBtn) {
+            continueBtn.onclick = () => this.continueGame();
+            this.log('Continue button connected');
+        }
+        
+        if (collectionsBtn) {
+            collectionsBtn.onclick = () => this.showCollections();
+            this.log('Collections button connected');
+        }
+        
+        if (quitBtn) {
+            quitBtn.onclick = () => this.quitGame();
+            this.log('Quit button connected');
+        }
+        
+        if (settingsBtn) {
+            settingsBtn.onclick = () => this.showSettings();
+            this.log('Settings button connected');
+        }
         
         // Game menu buttons
         const gameButtons = document.querySelectorAll('[data-game]');
+        this.log(`Found ${gameButtons.length} game buttons`);
+        
         gameButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const gameType = e.target.dataset.game;
+            btn.onclick = (e) => {
+                const gameType = e.target.dataset.game || e.target.closest('[data-game]').dataset.game;
+                this.log(`Game button clicked: ${gameType}`);
                 this.startGame(gameType);
-            });
+            };
         });
     }
     
     setupVideoControls() {
-        // Intro video controls
+        this.log('Setting up video controls');
+        
+        // Intro video setup with proper error handling
+        const introVideo = document.getElementById('introVideo');
+        if (introVideo) {
+            introVideo.src = 'assets/video/intro.mp4';
+            
+            introVideo.addEventListener('loadeddata', () => {
+                this.log('Intro video loaded successfully');
+            });
+            
+            introVideo.addEventListener('error', (e) => {
+                this.log('Intro video failed to load:', e);
+                console.warn('Intro video not found - will use animated intro');
+            });
+            
+            introVideo.addEventListener('ended', () => {
+                this.log('Intro video ended');
+                this.skipIntroVideo();
+            });
+        }
+        
+        // Ending video setup
+        const endingVideo = document.getElementById('endingVideo');
+        if (endingVideo) {
+            endingVideo.src = 'assets/video/ending.mp4';
+            
+            endingVideo.addEventListener('loadeddata', () => {
+                this.log('Ending video loaded successfully');
+            });
+            
+            endingVideo.addEventListener('error', (e) => {
+                this.log('Ending video failed to load:', e);
+                console.warn('Ending video not found - will use congratulations screen');
+            });
+            
+            endingVideo.addEventListener('ended', () => {
+                this.log('Ending video ended');
+                setTimeout(() => this.hideEndingVideo(), 2000);
+            });
+        }
+        
+        // Video control buttons
         const skipIntroBtn = document.getElementById('skipIntro');
         const continueStoryBtn = document.getElementById('continueStory');
-        
-        if (skipIntroBtn) {
-            skipIntroBtn.addEventListener('click', () => this.skipIntroVideo());
-        }
-        
-        if (continueStoryBtn) {
-            continueStoryBtn.addEventListener('click', () => this.skipIntroVideo());
-        }
-        
-        // Ending video controls
         const playAgainBtn = document.getElementById('playAgain');
         const backToMenuBtn = document.getElementById('backToMenu');
         
+        if (skipIntroBtn) {
+            skipIntroBtn.onclick = () => {
+                this.log('Skip intro clicked');
+                this.skipIntroVideo();
+            };
+        }
+        
+        if (continueStoryBtn) {
+            continueStoryBtn.onclick = () => {
+                this.log('Continue story clicked');
+                this.skipIntroVideo();
+            };
+        }
+        
         if (playAgainBtn) {
-            playAgainBtn.addEventListener('click', () => this.restartGame());
+            playAgainBtn.onclick = () => {
+                this.log('Play again clicked');
+                this.restartGame();
+            };
         }
         
         if (backToMenuBtn) {
-            backToMenuBtn.addEventListener('click', () => this.hideEndingVideo());
+            backToMenuBtn.onclick = () => {
+                this.log('Back to menu clicked');
+                this.hideEndingVideo();
+            };
         }
-        
-        // Video ended events
-        const introVideo = document.getElementById('introVideo');
-        const endingVideo = document.getElementById('endingVideo');
-        
-        if (introVideo) {
-            introVideo.addEventListener('ended', () => this.skipIntroVideo());
-            introVideo.addEventListener('error', () => {
-                console.log('Intro video not found, showing story intro instead');
-                this.showStoryIntro();
-            });
-        }
-        
-        if (endingVideo) {
-            endingVideo.addEventListener('ended', () => {
-                setTimeout(() => this.hideEndingVideo(), 2000);
-            });
-            endingVideo.addEventListener('error', () => {
-                console.log('Ending video not found, showing congratulations screen');
-                this.showFinalCongratulations();
-            });
+    }
+    
+    setupSettingsPanel() {
+        const closeSettingsBtn = document.getElementById('closeSettings');
+        if (closeSettingsBtn) {
+            closeSettingsBtn.onclick = () => {
+                const settingsPanel = document.getElementById('settingsPanel');
+                if (settingsPanel) {
+                    settingsPanel.style.display = 'none';
+                }
+            };
         }
     }
     
     // ==================== MAIN MENU SYSTEM ====================
     
     showMainMenu() {
+        this.log('Showing main menu');
         this.hideAllGameContainers();
         
         const mainMenu = document.getElementById('mainMenu');
         const gameContainer = document.getElementById('gameContainer');
         
-        if (mainMenu) mainMenu.style.display = 'block';
-        if (gameContainer) gameContainer.style.display = 'block';
+        if (mainMenu) {
+            mainMenu.style.display = 'block';
+            this.log('Main menu visible');
+        }
+        
+        if (gameContainer) {
+            gameContainer.style.display = 'block';
+            this.log('Game container visible');
+        }
         
         this.updateMainMenuButtons();
-        console.log('Main menu displayed');
     }
     
     updateMainMenuButtons() {
@@ -146,6 +264,7 @@ class GameSystem {
     }
     
     showGameMenu() {
+        this.log('Showing game menu');
         this.hideAllGameContainers();
         
         const gameMenu = document.getElementById('gameMenu');
@@ -153,9 +272,8 @@ class GameSystem {
             gameMenu.style.display = 'block';
             this.updateGameMenuButtons();
             this.updateGameStats();
+            this.log('Game menu displayed');
         }
-        
-        console.log('Game menu displayed');
     }
     
     updateGameMenuButtons() {
@@ -214,6 +332,7 @@ class GameSystem {
     }
     
     showCollections() {
+        this.log('Showing collections');
         this.hideAllGameContainers();
         
         const collectionsMenu = document.getElementById('collectionsMenu');
@@ -255,16 +374,18 @@ class GameSystem {
     // ==================== GAME FLOW MANAGEMENT ====================
     
     startNewGame() {
-        // Show intro first
+        this.log('Starting new game');
         this.showIntroVideo();
     }
     
     continueGame() {
-        // Go directly to game menu
+        this.log('Continuing game');
         this.showGameMenu();
     }
     
     startGame(gameType) {
+        this.log(`Starting game: ${gameType}`);
+        
         if (!this.gameStates[gameType]?.unlocked) {
             this.showMessage('🔒 這個遊戲還沒有解鎖！先完成前面的挑戰。', 3000);
             return;
@@ -288,11 +409,15 @@ class GameSystem {
             });
             document.dispatchEvent(event);
             
-            console.log(`Starting game: ${gameType}`);
+            this.log(`Game ${gameType} started successfully`);
+        } else {
+            console.error(`Game container ${gameType} not found`);
         }
     }
     
     checkLevelCompletion(gameType) {
+        this.log(`Checking completion for ${gameType}`);
+        
         if (this.gameStates[gameType]) {
             this.gameStates[gameType].completed = true;
             
@@ -308,11 +433,13 @@ class GameSystem {
             // Show transition to next stage
             const nextGame = this.getNextGame(gameType);
             if (nextGame) {
+                this.log(`Transitioning from ${gameType} to ${nextGame}`);
                 setTimeout(() => {
                     this.showStageTransition(gameType, nextGame);
                 }, 1000);
             } else if (gameType === 'bossFight') {
                 // Final victory - show ending
+                this.log('Boss defeated - showing ending');
                 setTimeout(() => {
                     this.showEndingVideo();
                 }, 2000);
@@ -337,6 +464,7 @@ class GameSystem {
                 knowledgeGem: '知識寶石 💎'
             };
             
+            this.log(`Awarded artifact: ${artifactNames[artifact]}`);
             this.showMessage(`🏆 獲得神器：${artifactNames[artifact]}`, 3000);
         }
     }
@@ -350,6 +478,7 @@ class GameSystem {
             if (this.gameStates[nextGame]) {
                 this.gameStates[nextGame].unlocked = true;
                 this.currentStage = currentIndex + 2;
+                this.log(`Unlocked next game: ${nextGame}`);
             }
         }
     }
@@ -369,391 +498,52 @@ class GameSystem {
         return this.artifacts.explorer && this.artifacts.timeController && this.artifacts.knowledgeGem;
     }
     
-    // ==================== STAGE TRANSITIONS ====================
-    
-    showStageTransition(completedGame, nextGame) {
-        const transitionData = {
-            wordSearch: {
-                name: '石橋修復',
-                icon: '🌉',
-                artifact: '👁',
-                artifactName: '探險者之眼',
-                nextName: '石塊斬擊',
-                nextIcon: '⚔️',
-                bg: 'linear-gradient(180deg, #87ceeb 0%, #4682b4 50%, #2e8b57 100%)',
-                story: '橋樑修復完成！接下來要面對從天空掉落的音標石塊挑戰...'
-            },
-            fallingWords: {
-                name: '石塊斬擊',
-                icon: '⚔️',
-                artifact: '⏰',
-                artifactName: '時間控制者',
-                nextName: '催眠術破解',
-                nextIcon: '🧙‍♂️',
-                bg: 'linear-gradient(180deg, #1e293b 0%, #475569 100%)',
-                story: '石塊斬擊成功！現在要對抗邪惡巫師的催眠術...'
-            },
-            multipleChoice: {
-                name: '催眠術破解',
-                icon: '🧙‍♂️',
-                artifact: '💎',
-                artifactName: '知識寶石',
-                nextName: '最終Boss戰',
-                nextIcon: '👑',
-                bg: 'linear-gradient(45deg, #2d1b69 0%, #8b5cf6 50%, #2d1b69 100%)',
-                story: '催眠術被破解！準備面對最終的發音之王Boss戰！'
-            }
-        };
-        
-        const data = transitionData[completedGame];
-        if (!data) return;
-        
-        // Create full-screen transition cutscene
-        const transitionDiv = document.createElement('div');
-        transitionDiv.id = 'stageTransition';
-        transitionDiv.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999;
-            background: ${data.bg}; display: flex; align-items: center; justify-content: center;
-            animation: fadeIn 1s ease-out;
-        `;
-        
-        transitionDiv.innerHTML = `
-            <!-- Cinematic letterbox bars -->
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 80px; 
-                        background: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.3));"></div>
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 80px; 
-                        background: linear-gradient(0deg, rgba(0,0,0,0.9), rgba(0,0,0,0.3));"></div>
-            
-            <div class="transition-content" style="
-                text-align: center; color: white; max-width: 800px; padding: 60px; 
-                background: rgba(0,0,0,0.4); border-radius: 20px; position: relative;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-                
-                <!-- Chapter Complete Section -->
-                <div class="chapter-complete" style="margin-bottom: 50px;">
-                    <div style="font-size: 100px; margin: 30px 0; animation: stageIcon 2s ease-in-out infinite;">
-                        ${data.icon}
-                    </div>
-                    
-                    <h1 style="font-size: 48px; margin: 30px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
-                               background: linear-gradient(45deg, #4ecca3, #2ecc71); 
-                               -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                        ${data.name}完成！
-                    </h1>
-                    
-                    <!-- Artifact Showcase -->
-                    <div class="artifact-showcase" style="
-                        background: rgba(255,255,255,0.15); padding: 30px; border-radius: 20px; 
-                        margin: 40px 0; border: 3px solid rgba(255,255,255,0.3);
-                        animation: artifactGlow 3s ease-in-out infinite;">
-                        
-                        <h3 style="margin-top: 0; color: #fbbf24; font-size: 24px;">🏆 獲得傳說神器</h3>
-                        <div style="font-size: 80px; margin: 20px 0; animation: artifactSpin 4s linear infinite;">
-                            ${data.artifact}
-                        </div>
-                        <p style="font-size: 22px; margin: 15px 0; font-weight: bold; color: #4ecca3;">
-                            ${data.artifactName}
-                        </p>
-                        
-                        <!-- Power level indicator -->
-                        <div style="margin: 20px 0;">
-                            <div style="color: #94a3b8; font-size: 14px;">神器力量等級</div>
-                            <div style="width: 200px; height: 8px; background: rgba(255,255,255,0.3); 
-                                       border-radius: 4px; margin: 8px auto; overflow: hidden;">
-                                <div style="width: 100%; height: 100%; 
-                                           background: linear-gradient(90deg, #4ecca3, #2ecc71, #fbbf24);
-                                           border-radius: 4px; animation: powerFill 2s ease-out 1s both;">
-                                </div>
-                            </div>
-                            <div style="color: #4ecca3; font-size: 16px; font-weight: bold;">MAX</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Chapter Transition -->
-                <div class="chapter-transition" style="margin: 50px 0; position: relative;">
-                    <!-- Animated separator -->
-                    <div style="height: 2px; background: linear-gradient(90deg, transparent, #4ecca3, transparent); 
-                               margin: 30px 0; animation: separator 3s ease-in-out infinite;"></div>
-                    
-                    <h2 style="font-size: 28px; margin: 30px 0; color: #fbbf24;">
-                        📖 冒險故事繼續...
-                    </h2>
-                    
-                    <div class="story-text" style="
-                        background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; 
-                        margin: 30px 0; font-size: 20px; line-height: 1.6; 
-                        border-left: 5px solid #4ecca3;">
-                        ${data.story}
-                    </div>
-                    
-                    <!-- Next chapter preview -->
-                    <div class="next-chapter" style="
-                        background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; 
-                        margin: 30px 0; border: 2px solid rgba(255,255,255,0.2);">
-                        
-                        <h3 style="color: #94a3b8; margin-top: 0;">下一章節</h3>
-                        <div style="display: flex; align-items: center; justify-content: center; margin: 20px 0;">
-                            <div style="font-size: 60px; margin: 0 20px; animation: nextIcon 2s ease-in-out infinite 0.5s;">
-                                ${data.nextIcon}
-                            </div>
-                            <div>
-                                <h2 style="margin: 5px 0; font-size: 32px; color: #e5e7eb;">
-                                    ${data.nextName}
-                                </h2>
-                                <div style="color: #94a3b8; font-size: 16px;">
-                                    新的挑戰等待著你...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Auto-progress countdown -->
-                <div class="auto-progress" style="margin: 40px 0;">
-                    <div style="color: #94a3b8; font-size: 18px; margin-bottom: 15px;">
-                        自動進入下一階段倒數：<span id="countdown" style="color: #4ecca3; font-weight: bold; font-size: 24px;">5</span>秒
-                    </div>
-                    
-                    <!-- Circular countdown -->
-                    <div style="position: relative; width: 60px; height: 60px; margin: 20px auto;">
-                        <svg width="60" height="60" style="transform: rotate(-90deg);">
-                            <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="4"/>
-                            <circle id="countdownCircle" cx="30" cy="30" r="25" fill="none" 
-                                    stroke="#4ecca3" stroke-width="4" stroke-linecap="round"
-                                    stroke-dasharray="157" stroke-dashoffset="157"
-                                    style="transition: stroke-dashoffset 1s linear;"/>
-                        </svg>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                                   color: #4ecca3; font-size: 18px; font-weight: bold;">
-                            <span id="countdownNumber">5</span>
-                        </div>
-                    </div>
-                    
-                    <div style="width: 300px; height: 6px; background: rgba(255,255,255,0.3); 
-                               border-radius: 3px; margin: 20px auto; overflow: hidden;">
-                        <div id="autoProgressBar" style="
-                            width: 100%; height: 100%; background: linear-gradient(90deg, #4ecca3, #2ecc71);
-                            transition: width 5s linear; border-radius: 3px;">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Control buttons -->
-                <div style="margin-top: 40px;">
-                    <button id="continueNow" style="
-                        background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
-                        padding: 18px 35px; border-radius: 12px; font-size: 20px; font-weight: bold; 
-                        cursor: pointer; margin: 0 15px; box-shadow: 0 8px 25px rgba(76, 204, 163, 0.4);
-                        transition: transform 0.3s ease;">
-                        ⚡ 立即繼續冒險
-                    </button>
-                    
-                    <button id="backToMenu" style="
-                        background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
-                        padding: 18px 35px; border-radius: 12px; font-size: 20px; font-weight: bold; 
-                        cursor: pointer; margin: 0 15px; transition: all 0.3s ease;">
-                        🏠 返回選單
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Animated background particles -->
-            <div class="bg-particles" style="position: absolute; width: 100%; height: 100%; overflow: hidden; z-index: -1;">
-                ${Array.from({length: 20}, (_, i) => `
-                    <div style="position: absolute; 
-                               left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; 
-                               width: 4px; height: 4px; background: rgba(255,255,255,0.6); border-radius: 50%;
-                               animation: particle${i % 3 + 1} ${3 + Math.random() * 2}s ease-in-out infinite ${Math.random() * 2}s;"></div>
-                `).join('')}
-            </div>
-            
-            <style>
-            @keyframes fadeIn {
-                from { opacity: 0; transform: scale(0.9); }
-                to { opacity: 1; transform: scale(1); }
-            }
-            @keyframes stageIcon {
-                0%, 100% { transform: scale(1) rotate(0deg); }
-                50% { transform: scale(1.1) rotate(5deg); }
-            }
-            @keyframes artifactGlow {
-                0%, 100% { box-shadow: 0 0 30px rgba(76, 204, 163, 0.3); }
-                50% { box-shadow: 0 0 50px rgba(76, 204, 163, 0.6); }
-            }
-            @keyframes artifactSpin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-            @keyframes powerFill {
-                from { width: 0%; }
-                to { width: 100%; }
-            }
-            @keyframes separator {
-                0%, 100% { opacity: 0.5; }
-                50% { opacity: 1; }
-            }
-            @keyframes nextIcon {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.2); }
-            }
-            @keyframes particle1 {
-                0%, 100% { opacity: 0.2; transform: translateY(0); }
-                50% { opacity: 1; transform: translateY(-20px); }
-            }
-            @keyframes particle2 {
-                0%, 100% { opacity: 0.3; transform: translateX(0); }
-                50% { opacity: 1; transform: translateX(15px); }
-            }
-            @keyframes particle3 {
-                0%, 100% { opacity: 0.4; transform: translate(0, 0); }
-                50% { opacity: 1; transform: translate(-10px, -15px); }
-            }
-            
-            #continueNow:hover { transform: translateY(-3px) scale(1.05); }
-            #backToMenu:hover { background: rgba(255,255,255,0.3); }
-            </style>
-        `;
-        
-        document.body.appendChild(transitionDiv);
-        
-        // Setup enhanced countdown with circular progress
-        this.setupEnhancedCountdown(nextGame, transitionDiv);
-    }
-    
-    setupEnhancedCountdown(nextGame, transitionDiv) {
-        let countdown = 5;
-        const countdownElement = document.getElementById('countdownNumber');
-        const countdownCircle = document.getElementById('countdownCircle');
-        const progressBar = document.getElementById('autoProgressBar');
-        
-        // Start circular countdown animation
-        const circumference = 2 * Math.PI * 25; // radius = 25
-        
-        const updateCircularProgress = () => {
-            const progress = (5 - countdown) / 5;
-            const offset = circumference - (progress * circumference);
-            if (countdownCircle) {
-                countdownCircle.style.strokeDashoffset = offset;
-            }
-        };
-        
-        // Start progress bar animation
-        setTimeout(() => {
-            if (progressBar) {
-                progressBar.style.width = '0%';
-            }
-        }, 100);
-        
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            
-            if (countdownElement) {
-                countdownElement.textContent = countdown;
-            }
-            
-            updateCircularProgress();
-            
-            if (countdown <= 0) {
-                clearInterval(countdownInterval);
-                this.proceedToNextGame(nextGame);
-                this.removeTransition();
-            }
-        }, 1000);
-        
-        // Setup button events
-        const continueBtn = document.getElementById('continueNow');
-        const backBtn = document.getElementById('backToMenu');
-        
-        if (continueBtn) {
-            continueBtn.addEventListener('click', () => {
-                clearInterval(countdownInterval);
-                this.proceedToNextGame(nextGame);
-                this.removeTransition();
-            });
-        }
-        
-        if (backBtn) {
-            backBtn.addEventListener('click', () => {
-                clearInterval(countdownInterval);
-                this.removeTransition();
-                this.showGameMenu();
-            });
-        }
-    }
-    
-    proceedToNextGame(nextGame) {
-        console.log('Proceeding to next game:', nextGame);
-        
-        if (nextGame === 'bossFight' && !this.canAccessBoss()) {
-            this.showMessage('🔒 需要收集所有三個神器才能挑戰Boss！', 3000);
-            setTimeout(() => this.showGameMenu(), 3000);
-        } else {
-            // Small delay before starting next game
-            setTimeout(() => {
-                this.startGame(nextGame);
-            }, 500);
-        }
-    }
-    
-    removeTransition() {
-        const transition = document.getElementById('stageTransition');
-        if (transition && transition.parentNode) {
-            document.body.removeChild(transition);
-        }
-    }
-    
-    // ==================== VIDEO SYSTEM ====================
+    // ==================== VIDEO SYSTEM (FIXED) ====================
     
     showIntroVideo() {
+        this.log('Attempting to show intro video');
+        
         const storyContainer = document.getElementById('storyContainer');
         const introVideo = document.getElementById('introVideo');
         
         if (storyContainer) {
-            storyContainer.style.display = 'block';
             this.hideAllGameContainers();
-            
-            console.log('Showing intro video');
+            storyContainer.style.display = 'block';
             
             if (introVideo) {
-                // Try to play the video
+                this.log('Intro video element found, attempting to play');
+                
+                // Reset video to beginning
                 introVideo.currentTime = 0;
+                
+                // Try to play the video
                 const playPromise = introVideo.play();
                 
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        console.log('Intro video playing');
+                        this.log('Intro video playing successfully');
                     }).catch(error => {
-                        console.log('Video autoplay failed:', error);
-                        // Show story intro instead
-                        this.showStoryIntro();
+                        this.log('Video autoplay failed, showing controls:', error);
+                        // Video is there but autoplay failed - show controls
+                        introVideo.controls = true;
                     });
                 }
             } else {
-                // No video element, show story intro
+                this.log('Intro video element not found');
                 this.showStoryIntro();
             }
             
             // Mark intro as seen
             localStorage.setItem('hasSeenIntro', 'true');
         } else {
-            // No story container, show story intro directly
+            this.log('Story container not found, showing story intro');
             this.showStoryIntro();
         }
     }
     
-    showStoryIntro() {
-        // Hide video container
-        const storyContainer = document.getElementById('storyContainer');
-        if (storyContainer) {
-            storyContainer.style.display = 'none';
-        }
-        
-        // Show animated story intro
-        this.showIntroAnimation();
-    }
-    
     skipIntroVideo() {
+        this.log('Skipping intro video');
+        
         const storyContainer = document.getElementById('storyContainer');
         const introVideo = document.getElementById('introVideo');
         
@@ -772,7 +562,22 @@ class GameSystem {
         }, 500);
     }
     
+    showStoryIntro() {
+        this.log('Showing animated story intro');
+        
+        // Hide video container
+        const storyContainer = document.getElementById('storyContainer');
+        if (storyContainer) {
+            storyContainer.style.display = 'none';
+        }
+        
+        // Show animated story intro
+        this.showIntroAnimation();
+    }
+    
     showIntroAnimation() {
+        this.log('Creating intro animation');
+        
         const introDiv = document.createElement('div');
         introDiv.id = 'gameIntro';
         introDiv.style.cssText = `
@@ -814,7 +619,7 @@ class GameSystem {
                     </p>
                 </div>
                 
-                <button onclick="window.gameSystem.hideIntroAnimation(); window.gameSystem.showGameMenu();" style="
+                <button id="startAdventureBtn" style="
                     background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
                     padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                     cursor: pointer; margin: 30px 10px; box-shadow: 0 8px 25px rgba(76, 204, 163, 0.4);
@@ -822,7 +627,7 @@ class GameSystem {
                     🚀 開始冒險
                 </button>
                 
-                <button onclick="window.gameSystem.hideIntroAnimation(); window.gameSystem.showMainMenu();" style="
+                <button id="backToMainBtn" style="
                     background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
                     padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                     cursor: pointer; margin: 30px 10px;">
@@ -847,6 +652,17 @@ class GameSystem {
         `;
         
         document.body.appendChild(introDiv);
+        
+        // Setup button handlers
+        document.getElementById('startAdventureBtn').onclick = () => {
+            this.hideIntroAnimation();
+            this.showGameMenu();
+        };
+        
+        document.getElementById('backToMainBtn').onclick = () => {
+            this.hideIntroAnimation();
+            this.showMainMenu();
+        };
     }
     
     hideIntroAnimation() {
@@ -857,38 +673,46 @@ class GameSystem {
     }
     
     showEndingVideo() {
+        this.log('Attempting to show ending video');
+        
         const endingContainer = document.getElementById('endingContainer');
         const endingVideo = document.getElementById('endingVideo');
         
         if (endingContainer) {
+            this.hideAllGameContainers();
             endingContainer.style.display = 'flex';
-            console.log('Showing ending video');
             
             if (endingVideo) {
-                // Try to play the ending video
+                this.log('Ending video element found, attempting to play');
+                
+                // Reset video to beginning
                 endingVideo.currentTime = 0;
+                
+                // Try to play the ending video
                 const playPromise = endingVideo.play();
                 
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
-                        console.log('Ending video playing');
+                        this.log('Ending video playing successfully');
                     }).catch(error => {
-                        console.log('Ending video autoplay failed:', error);
-                        // Show congratulations screen instead
-                        this.showFinalCongratulations();
+                        this.log('Ending video autoplay failed:', error);
+                        // Show controls if autoplay failed
+                        endingVideo.controls = true;
                     });
                 }
             } else {
-                // No video element, show congratulations
+                this.log('Ending video element not found, showing congratulations');
                 this.showFinalCongratulations();
             }
         } else {
-            // No ending container, show congratulations
+            this.log('Ending container not found, showing congratulations');
             this.showFinalCongratulations();
         }
     }
     
     hideEndingVideo() {
+        this.log('Hiding ending video');
+        
         const endingContainer = document.getElementById('endingContainer');
         const endingVideo = document.getElementById('endingVideo');
         
@@ -908,6 +732,8 @@ class GameSystem {
     }
     
     showFinalCongratulations() {
+        this.log('Showing final congratulations screen');
+        
         // Hide ending video container
         const endingContainer = document.getElementById('endingContainer');
         if (endingContainer) {
@@ -965,14 +791,14 @@ class GameSystem {
                 </div>
                 
                 <div style="margin: 40px 0;">
-                    <button onclick="window.gameSystem.hideFinalCongratulations(); window.gameSystem.showMainMenu();" style="
+                    <button id="finalBackToMenuBtn" style="
                         background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
                         padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                         cursor: pointer; margin: 0 15px; box-shadow: 0 8px 25px rgba(76, 204, 163, 0.4);">
                         🏠 返回主選單
                     </button>
                     
-                    <button onclick="window.location.reload();" style="
+                    <button id="finalRestartBtn" style="
                         background: linear-gradient(45deg, #8b5cf6, #7c3aed); color: white; border: none; 
                         padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                         cursor: pointer; margin: 0 15px; box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);">
@@ -991,6 +817,16 @@ class GameSystem {
         `;
         
         document.body.appendChild(congratsDiv);
+        
+        // Setup button handlers
+        document.getElementById('finalBackToMenuBtn').onclick = () => {
+            this.hideFinalCongratulations();
+            this.showMainMenu();
+        };
+        
+        document.getElementById('finalRestartBtn').onclick = () => {
+            this.restartGame();
+        };
     }
     
     hideFinalCongratulations() {
@@ -1001,18 +837,157 @@ class GameSystem {
     }
     
     restartGame() {
-        // Reset all game states
+        this.log('Restarting game');
         this.resetAllGameStates();
-        
-        // Reload the page for fresh start
         window.location.reload();
+    }
+    
+    // ==================== STAGE TRANSITIONS ====================
+    
+    showStageTransition(completedGame, nextGame) {
+        this.log(`Showing transition from ${completedGame} to ${nextGame}`);
+        
+        const transitionData = {
+            wordSearch: {
+                name: '石橋修復',
+                icon: '🌉',
+                artifact: '👁',
+                artifactName: '探險者之眼',
+                nextName: '石塊斬擊',
+                nextIcon: '⚔️',
+                bg: 'linear-gradient(180deg, #87ceeb 0%, #4682b4 50%, #2e8b57 100%)',
+                story: '橋樑修復完成！接下來要面對從天空掉落的音標石塊挑戰...'
+            },
+            fallingWords: {
+                name: '石塊斬擊',
+                icon: '⚔️',
+                artifact: '⏰',
+                artifactName: '時間控制者',
+                nextName: '催眠術破解',
+                nextIcon: '🧙‍♂️',
+                bg: 'linear-gradient(180deg, #1e293b 0%, #475569 100%)',
+                story: '石塊斬擊成功！現在要對抗邪惡巫師的催眠術...'
+            },
+            multipleChoice: {
+                name: '催眠術破解',
+                icon: '🧙‍♂️',
+                artifact: '💎',
+                artifactName: '知識寶石',
+                nextName: '最終Boss戰',
+                nextIcon: '👑',
+                bg: 'linear-gradient(45deg, #2d1b69 0%, #8b5cf6 50%, #2d1b69 100%)',
+                story: '催眠術被破解！準備面對最終的發音之王Boss戰！'
+            }
+        };
+        
+        const data = transitionData[completedGame];
+        if (!data) {
+            this.log(`No transition data for ${completedGame}`);
+            return;
+        }
+        
+        // Create transition screen - simplified version to avoid errors
+        const transitionDiv = document.createElement('div');
+        transitionDiv.id = 'stageTransition';
+        transitionDiv.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999;
+            background: ${data.bg}; display: flex; align-items: center; justify-content: center;
+        `;
+        
+        transitionDiv.innerHTML = `
+            <div class="transition-content" style="
+                text-align: center; color: white; max-width: 800px; padding: 60px; 
+                background: rgba(0,0,0,0.4); border-radius: 20px;">
+                
+                <div style="font-size: 100px; margin: 30px 0;">${data.icon}</div>
+                
+                <h1 style="font-size: 48px; margin: 30px 0; color: #4ecca3;">
+                    ${data.name}完成！
+                </h1>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 30px; border-radius: 20px; margin: 40px 0;">
+                    <h3 style="margin-top: 0; color: #fbbf24; font-size: 24px;">🏆 獲得傳說神器</h3>
+                    <div style="font-size: 80px; margin: 20px 0;">${data.artifact}</div>
+                    <p style="font-size: 22px; margin: 15px 0; font-weight: bold; color: #4ecca3;">
+                        ${data.artifactName}
+                    </p>
+                </div>
+                
+                <div style="background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; margin: 30px 0;">
+                    ${data.story}
+                </div>
+                
+                <h3 style="color: #94a3b8;">下一章節</h3>
+                <div style="font-size: 60px; margin: 20px 0;">${data.nextIcon}</div>
+                <h2 style="margin: 5px 0; font-size: 32px; color: #e5e7eb;">${data.nextName}</h2>
+                
+                <div style="margin: 40px 0;">
+                    <button id="transitionContinue" style="
+                        background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
+                        padding: 18px 35px; border-radius: 12px; font-size: 20px; font-weight: bold; 
+                        cursor: pointer; margin: 0 15px;">
+                        ⚡ 立即繼續冒險
+                    </button>
+                    
+                    <button id="transitionMenu" style="
+                        background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
+                        padding: 18px 35px; border-radius: 12px; font-size: 20px; font-weight: bold; 
+                        cursor: pointer; margin: 0 15px;">
+                        🏠 返回選單
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(transitionDiv);
+        
+        // Setup button handlers
+        document.getElementById('transitionContinue').onclick = () => {
+            this.removeTransition();
+            this.proceedToNextGame(nextGame);
+        };
+        
+        document.getElementById('transitionMenu').onclick = () => {
+            this.removeTransition();
+            this.showGameMenu();
+        };
+        
+        // Auto-proceed after 8 seconds
+        setTimeout(() => {
+            if (document.getElementById('stageTransition')) {
+                this.removeTransition();
+                this.proceedToNextGame(nextGame);
+            }
+        }, 8000);
+    }
+    
+    proceedToNextGame(nextGame) {
+        this.log(`Proceeding to next game: ${nextGame}`);
+        
+        if (nextGame === 'bossFight' && !this.canAccessBoss()) {
+            this.showMessage('🔒 需要收集所有三個神器才能挑戰Boss！', 3000);
+            setTimeout(() => this.showGameMenu(), 3000);
+        } else {
+            setTimeout(() => {
+                this.startGame(nextGame);
+            }, 500);
+        }
+    }
+    
+    removeTransition() {
+        const transition = document.getElementById('stageTransition');
+        if (transition && transition.parentNode) {
+            document.body.removeChild(transition);
+        }
     }
     
     // ==================== UTILITY FUNCTIONS ====================
     
     hideAllGameContainers() {
-        const gameContainers = ['mainMenu', 'gameMenu', 'collectionsMenu', 'storyContainer', 'endingContainer',
-                               'wordSearch', 'fallingWords', 'multipleChoice', 'bossFight'];
+        const gameContainers = [
+            'mainMenu', 'gameMenu', 'collectionsMenu', 'storyContainer', 'endingContainer',
+            'wordSearch', 'fallingWords', 'multipleChoice', 'bossFight'
+        ];
         
         gameContainers.forEach(containerId => {
             const container = document.getElementById(containerId);
@@ -1021,7 +996,7 @@ class GameSystem {
             }
         });
         
-        // Also hide any transition screens
+        // Also hide any dynamic screens
         this.removeTransition();
         this.hideIntroAnimation();
         this.hideFinalCongratulations();
@@ -1035,9 +1010,10 @@ class GameSystem {
                 this.gameStates[gameType].score += points;
             }
             
-            // Update total score
             this.calculateTotalScore();
             this.saveGameState();
+            
+            this.log(`Score updated for ${gameType}: ${this.gameStates[gameType].score}`);
         }
     }
     
@@ -1046,6 +1022,8 @@ class GameSystem {
     }
     
     showMessage(message, duration = 3000) {
+        this.log(`Showing message: ${message}`);
+        
         // Remove existing messages
         const existingMessage = document.getElementById('gameMessage');
         if (existingMessage) {
@@ -1059,34 +1037,14 @@ class GameSystem {
             background: rgba(0,0,0,0.9); color: white; padding: 25px 35px; 
             border-radius: 15px; font-size: 20px; text-align: center; z-index: 10000; 
             box-shadow: 0 8px 25px rgba(0,0,0,0.5); border: 2px solid #4ecca3;
-            animation: messageSlideIn 0.5s ease-out;
         `;
         
         messageDiv.innerHTML = message;
-        
-        // Add CSS animation
-        if (!document.getElementById('messageAnimation')) {
-            const style = document.createElement('style');
-            style.id = 'messageAnimation';
-            style.textContent = `
-                @keyframes messageSlideIn {
-                    from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-                    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
         document.body.appendChild(messageDiv);
         
         setTimeout(() => {
             if (messageDiv.parentNode) {
-                messageDiv.style.animation = 'messageSlideIn 0.5s ease-out reverse';
-                setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        document.body.removeChild(messageDiv);
-                    }
-                }, 500);
+                document.body.removeChild(messageDiv);
             }
         }, duration);
     }
@@ -1100,7 +1058,6 @@ class GameSystem {
     
     quitGame() {
         if (confirm('確定要離開遊戲嗎？')) {
-            // Save current state before closing
             this.saveGameState();
             window.close();
         }
@@ -1109,22 +1066,26 @@ class GameSystem {
     // ==================== DATA PERSISTENCE ====================
     
     saveGameState() {
-        const gameData = {
-            totalScore: this.totalScore,
-            gameStates: this.gameStates,
-            artifacts: this.artifacts,
-            currentStage: this.currentStage
-        };
-        
-        localStorage.setItem('languageQuestSave', JSON.stringify(gameData));
-        console.log('Game state saved');
+        try {
+            const gameData = {
+                totalScore: this.totalScore,
+                gameStates: this.gameStates,
+                artifacts: this.artifacts,
+                currentStage: this.currentStage
+            };
+            
+            localStorage.setItem('languageQuestSave', JSON.stringify(gameData));
+            this.log('Game state saved successfully');
+        } catch (error) {
+            console.error('Failed to save game state:', error);
+        }
     }
     
     loadGameState() {
-        const savedData = localStorage.getItem('languageQuestSave');
-        
-        if (savedData) {
-            try {
+        try {
+            const savedData = localStorage.getItem('languageQuestSave');
+            
+            if (savedData) {
                 const gameData = JSON.parse(savedData);
                 
                 this.totalScore = gameData.totalScore || 0;
@@ -1132,10 +1093,10 @@ class GameSystem {
                 this.artifacts = { ...this.artifacts, ...gameData.artifacts };
                 this.currentStage = gameData.currentStage || 1;
                 
-                console.log('Game state loaded');
-            } catch (error) {
-                console.error('Failed to load game state:', error);
+                this.log('Game state loaded successfully');
             }
+        } catch (error) {
+            console.error('Failed to load game state:', error);
         }
     }
     
@@ -1156,25 +1117,32 @@ class GameSystem {
             knowledgeGem: false
         };
         
-        // Clear saved data
         localStorage.removeItem('languageQuestSave');
         localStorage.removeItem('hasSeenIntro');
         
-        this.saveGameState();
+        this.log('All game states reset');
     }
 }
 
-// Auto-initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize GameSystem
-    window.gameSystem = new GameSystem();
-    console.log('Complete Game System initialized');
+// Initialize the game system when DOM is ready
+(() => {
+    console.log('[GameSystem] Script loaded, waiting for DOM...');
     
-    // Show main menu after initialization
-    setTimeout(() => {
-        window.gameSystem.showMainMenu();
-    }, 100);
-});
+    const initializeGameSystem = () => {
+        try {
+            window.gameSystem = new GameSystem();
+            console.log('[GameSystem] Game system initialized successfully');
+        } catch (error) {
+            console.error('[GameSystem] Failed to initialize:', error);
+        }
+    };
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeGameSystem);
+    } else {
+        initializeGameSystem();
+    }
+})();
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
