@@ -1,461 +1,831 @@
 /**
- * Word Search Game Module - Enhanced with fixes
- * - Fixed shuffling and word placement
- * - Added pronunciation support
- * - Better visual presentation as cliff bridge building
- * - Proper wrong answer handling
+ * Word Search Game - Bridge Repair Mission
+ * Player needs to find 3 words for each pronunciation type (/t/, /d/, /id/) to repair the broken bridge
  */
-
 class WordSearchGame {
     constructor(gameSystem) {
         this.gameSystem = gameSystem;
-        this.grid = [];
-        this.gridSize = 12;
-        this.words = { t: [], d: [], id: [] };
-        this.foundWords = new Set();
+        this.selectedSound = null;
         this.selectedCells = [];
-        this.currentMode = 't';  // Current pronunciation mode
-        this.questionsCorrect = { t: 0, d: 0, id: 0 }; // Track correct answers per category
-        this.requiredCorrect = 3; // Need 3 correct per category
-
-        this.directions = [
-            [0, 1],   // horizontal
-            [1, 0],   // vertical  
-            [1, 1],   // diagonal down-right
-            [-1, 1]   // diagonal up-right
-        ];
-
+        this.currentWord = '';
+        this.foundWords = {
+            t: [],    // Need 3 words for /t/ sound
+            d: [],    // Need 3 words for /d/ sound  
+            id: []    // Need 3 words for /id/ sound
+        };
+        this.score = 0;
+        this.isGameActive = false;
+        this.isSelecting = false;
+        
+        // Bridge repair progress
+        this.bridgeSegments = {
+            t: { completed: false, wordsNeeded: 3 },
+            d: { completed: false, wordsNeeded: 3 },
+            id: { completed: false, wordsNeeded: 3 }
+        };
+        
+        // Game board properties
+        this.gridSize = 12;
+        this.grid = [];
+        this.wordsToFind = {
+            t: ['watched', 'crossed', 'kicked', 'danced', 'jumped', 'helped', 'worked', 'washed'],
+            d: ['gained', 'waved', 'played', 'lived', 'filled', 'loved', 'moved', 'called'],
+            id: ['guided', 'decided', 'folded', 'needed', 'hated', 'wanted', 'started', 'ended']
+        };
+        
+        // Visual elements for bridge
+        this.bridgePosition = { x: 150, y: 300, width: 500, height: 60 };
+        this.playerPosition = { x: 50, y: 280 };
+        
         this.init();
     }
-
+    
     init() {
+        console.log('Initializing Word Search Bridge Repair Game');
         this.setupEventListeners();
-        this.initializeBoard();
-        this.updateWordLists();
-        this.updateBridgeDisplay();
     }
-
+    
     setupEventListeners() {
-        // Sound mode selection
-        document.querySelectorAll('.color-mode-button').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.selectSoundMode(e.target.dataset.sound);
-            });
-        });
-
-        // Game controls
-        document.getElementById('confirmWord')?.addEventListener('click', () => this.confirmSelection());
-        document.getElementById('clearSelection')?.addEventListener('click', () => this.clearSelection());
-        document.getElementById('pronounceWord')?.addEventListener('click', () => this.pronounceSelected());
-
-        // Listen for game initialization
+        // Initialize when game starts
         document.addEventListener('gameInitialize', (e) => {
             if (e.detail.gameType === 'wordSearch') {
                 this.startGame();
             }
         });
-    }
-
-    selectSoundMode(sound) {
-        this.currentMode = sound;
-
-        // Update button states
-        document.querySelectorAll('.color-mode-button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.sound === sound);
+        
+        // Sound selection buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('color-mode-button') && e.target.closest('#wordSearch')) {
+                this.selectSound(e.target.dataset.sound);
+            }
         });
-
-        // Update selected sound display
-        const selectedDisplay = document.getElementById('selectedSound');
-        if (selectedDisplay) {
-            selectedDisplay.textContent = `/${sound}/`;
-        }
-
-        // Clear current selection
-        this.clearSelection();
-
-        // Play sound
-        if (window.SoundSystem) {
-            window.SoundSystem.play('click');
+        
+        // Game control buttons
+        this.bindButton('confirmWord', () => this.confirmWord());
+        this.bindButton('clearSelection', () => this.clearSelection());
+        this.bindButton('pronounceWord', () => this.pronounceWord());
+    }
+    
+    bindButton(id, callback) {
+        const button = document.getElementById(id);
+        if (button) {
+            button.addEventListener('click', callback);
         }
     }
-
+    
     startGame() {
-        this.generateWords();
-        this.createGrid();
-        this.placeWords();
-        this.fillEmptyCells();
-        this.renderGrid();
-        this.updateWordLists();
-        this.showBridgeScene();
+        console.log('Starting Word Search Bridge Repair');
+        this.resetGame();
+        this.showCutscene();
     }
-
-    generateWords() {
-        // Get words from database and shuffle them
-        const categories = ['t', 'd', 'id'];
-
-        categories.forEach(category => {
-            if (wordDatabase[category]) {
-                // Shuffle the word array
-                const shuffledWords = this.shuffleArray([...wordDatabase[category]]);
-                // Take 5 random words for each category
-                this.words[category] = shuffledWords.slice(0, 5);
-            }
+    
+    resetGame() {
+        this.selectedSound = null;
+        this.selectedCells = [];
+        this.currentWord = '';
+        this.foundWords = { t: [], d: [], id: [] };
+        this.score = 0;
+        this.isGameActive = true;
+        
+        // Reset bridge segments
+        Object.keys(this.bridgeSegments).forEach(type => {
+            this.bridgeSegments[type].completed = false;
         });
+        
+        this.generateWordGrid();
     }
-
-    shuffleArray(array) {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    
+    showCutscene() {
+        const cutscene = document.getElementById('game1Cutscene');
+        if (cutscene) {
+            cutscene.style.display = 'flex';
+            cutscene.innerHTML = `
+                <div class="cutscene-content cliff-scene" style="
+                    width: 100%; height: 100%; position: relative;
+                    background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 50%, #2F4F4F 100%);
+                    display: flex; align-items: center; justify-content: center;">
+                    
+                    <div class="cliff-scene" style="width: 80%; height: 80%; position: relative;">
+                        <!-- Left cliff -->
+                        <div style="position: absolute; left: 0; bottom: 0; width: 30%; height: 40%; 
+                                    background: #8B4513; border-radius: 10px 10px 0 0;"></div>
+                        
+                        <!-- Right cliff -->
+                        <div style="position: absolute; right: 0; bottom: 0; width: 30%; height: 40%; 
+                                    background: #8B4513; border-radius: 10px 10px 0 0;"></div>
+                        
+                        <!-- Broken bridge pieces -->
+                        <div style="position: absolute; left: 28%; bottom: 40%; width: 15%; height: 8%; 
+                                    background: #708090; transform: rotate(-10deg);"></div>
+                        <div style="position: absolute; right: 28%; bottom: 40%; width: 15%; height: 8%; 
+                                    background: #708090; transform: rotate(10deg);"></div>
+                        
+                        <!-- Player character -->
+                        <div style="position: absolute; left: 25%; bottom: 45%; width: 40px; height: 60px; 
+                                    background: #4ecca3; border-radius: 20px 20px 0 0;"></div>
+                        
+                        <!-- Gap in the middle -->
+                        <div style="position: absolute; left: 30%; bottom: 20%; right: 30%; height: 40%; 
+                                    background: radial-gradient(circle, rgba(70,130,180,0.5), transparent);
+                                    border-radius: 50%;"></div>
+                    </div>
+                    
+                    <div class="cutscene-text" style="position: absolute; top: 20px; left: 50%; 
+                                                      transform: translateX(-50%); 
+                                                      background: rgba(0,0,0,0.8); color: white; padding: 20px; 
+                                                      border-radius: 15px; max-width: 500px; text-align: center;">
+                        <h3>🌉 斷橋修復任務</h3>
+                        <p>前方的石橋已經斷裂！你需要找出正確的過去式單詞來修復橋樑。</p>
+                        <p><strong>任務目標：</strong></p>
+                        <ul style="text-align: left; padding-left: 20px;">
+                            <li>/t/ 音類型：找出 3 個單詞</li>
+                            <li>/d/ 音類型：找出 3 個單詞</li> 
+                            <li>/ɪd/ 音類型：找出 3 個單詞</li>
+                        </ul>
+                        <p>每完成一個類型，橋的一段就會修復好！</p>
+                        <button onclick="window.wordSearchGame.startMainGame()" 
+                                style="background: #4ecca3; color: white; border: none; 
+                                       padding: 15px 30px; border-radius: 10px; font-size: 16px; 
+                                       font-weight: bold; cursor: pointer; margin-top: 15px;">
+                            開始修復橋樑 🔧
+                        </button>
+                    </div>
+                </div>
+            `;
         }
-        return shuffled;
     }
-
-    createGrid() {
+    
+    startMainGame() {
+        // Hide cutscene and show game interface
+        const cutscene = document.getElementById('game1Cutscene');
+        const gameInterface = document.querySelector('#wordSearch .game-interface');
+        
+        if (cutscene) cutscene.style.display = 'none';
+        if (gameInterface) gameInterface.style.display = 'block';
+        
+        this.setupGameInterface();
+        this.updateBridgeVisual();
+    }
+    
+    setupGameInterface() {
+        const wordSearchContainer = document.getElementById('wordSearch');
+        if (!wordSearchContainer) return;
+        
+        // Create game interface if doesn't exist
+        let gameInterface = wordSearchContainer.querySelector('.game-interface');
+        if (!gameInterface) {
+            gameInterface = document.createElement('div');
+            gameInterface.className = 'game-interface';
+            gameInterface.innerHTML = this.createGameInterfaceHTML();
+            wordSearchContainer.appendChild(gameInterface);
+        }
+        
+        gameInterface.style.display = 'block';
+        this.generateWordGrid();
+        this.createVisualGrid();
+        this.updateUI();
+        this.updateBridgeVisual();
+    }
+    
+    createGameInterfaceHTML() {
+        return `
+            <!-- Bridge Visual -->
+            <div class="bridge-container" style="background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 100%); 
+                                                   height: 200px; position: relative; margin: 20px 0; 
+                                                   border-radius: 15px; overflow: hidden;">
+                <canvas id="bridgeCanvas" width="800" height="200" style="width: 100%; height: 100%;"></canvas>
+            </div>
+            
+            <!-- Progress Display -->
+            <div class="bridge-progress" style="display: flex; justify-content: space-around; margin: 20px 0; 
+                                                 background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                <div class="segment-progress" data-type="t">
+                    <h4>/t/ 音段</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%; background: #3498db; height: 10px; border-radius: 5px; transition: width 0.5s;"></div>
+                    </div>
+                    <p>進度: <span class="word-count">0</span>/3</p>
+                </div>
+                <div class="segment-progress" data-type="d">
+                    <h4>/d/ 音段</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%; background: #e74c3c; height: 10px; border-radius: 5px; transition: width 0.5s;"></div>
+                    </div>
+                    <p>進度: <span class="word-count">0</span>/3</p>
+                </div>
+                <div class="segment-progress" data-type="id">
+                    <h4>/ɪd/ 音段</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%; background: #2ecc71; height: 10px; border-radius: 5px; transition: width 0.5s;"></div>
+                    </div>
+                    <p>進度: <span class="word-count">0</span>/3</p>
+                </div>
+            </div>
+            
+            <!-- Sound Selection -->
+            <div class="sound-selection" style="text-align: center; margin: 20px 0; padding: 20px; 
+                                                background: rgba(255,255,255,0.1); border-radius: 15px;">
+                <h3>選擇發音類型來修復對應的橋段：</h3>
+                <div class="sound-buttons" style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
+                    <button class="color-mode-button" data-sound="t" style="background: #3498db; color: white; border: none; 
+                                                                           padding: 15px 25px; border-radius: 10px; font-size: 18px; 
+                                                                           font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                        /t/ 音 (無聲音)
+                    </button>
+                    <button class="color-mode-button" data-sound="d" style="background: #e74c3c; color: white; border: none; 
+                                                                           padding: 15px 25px; border-radius: 10px; font-size: 18px; 
+                                                                           font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                        /d/ 音 (有聲音)
+                    </button>
+                    <button class="color-mode-button" data-sound="id" style="background: #2ecc71; color: white; border: none; 
+                                                                            padding: 15px 25px; border-radius: 10px; font-size: 18px; 
+                                                                            font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                        /ɪd/ 音 (額外音節)
+                    </button>
+                </div>
+                <div class="selected-sound" style="font-size: 18px; color: white; font-weight: bold;">
+                    當前選擇: <span id="selectedSound">請選擇發音類型</span>
+                </div>
+            </div>
+            
+            <!-- Game Board -->
+            <div class="game-board-container" style="text-align: center;">
+                <div id="wordSearchBoard" style="display: inline-block; margin: 20px auto;"></div>
+            </div>
+            
+            <!-- Current Words to Find -->
+            <div class="current-words" style="text-align: center; margin: 20px 0; padding: 15px; 
+                                              background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <h4>當前需要尋找的單詞:</h4>
+                <div id="currentWordsDisplay" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
+                    <!-- Words will be shown here -->
+                </div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="game-controls" style="text-align: center; margin: 20px 0; padding: 20px; 
+                                              background: rgba(255,255,255,0.1); border-radius: 15px;">
+                <div class="selected-word-display" style="font-size: 20px; margin-bottom: 15px; color: white;">
+                    選中的單詞: <span id="selectedWord" style="font-weight: bold; color: #4ecca3;">-</span>
+                </div>
+                <div class="control-buttons" style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <button id="confirmWord" class="control-btn" style="background: #2ecc71; color: white; border: none; 
+                                                                       padding: 12px 24px; border-radius: 8px; cursor: pointer; 
+                                                                       font-weight: bold; font-size: 16px;">
+                        ✅ 確認單詞
+                    </button>
+                    <button id="clearSelection" class="control-btn" style="background: #e74c3c; color: white; border: none; 
+                                                                         padding: 12px 24px; border-radius: 8px; cursor: pointer; 
+                                                                         font-weight: bold; font-size: 16px;">
+                        🗑️ 清除選擇
+                    </button>
+                    <button id="pronounceWord" class="control-btn" style="background: #3498db; color: white; border: none; 
+                                                                        padding: 12px 24px; border-radius: 8px; cursor: pointer; 
+                                                                        font-weight: bold; font-size: 16px;">
+                        🔊 發音
+                    </button>
+                </div>
+            </div>
+            
+            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()" 
+                    style="position: fixed; bottom: 20px; right: 20px; background: #4ecca3; color: white; 
+                           border: none; padding: 12px 20px; border-radius: 25px; cursor: pointer; font-weight: bold;">
+                ← 返回選單
+            </button>
+        `;
+    }
+    
+    generateWordGrid() {
+        // Initialize empty grid
         this.grid = Array(this.gridSize).fill(null).map(() => Array(this.gridSize).fill(''));
-    }
-
-    placeWords() {
-        const allWords = [...this.words.t, ...this.words.d, ...this.words.id];
-        const placedWords = [];
-
-        // Shuffle the word list
-        const shuffledWords = this.shuffleArray(allWords);
-
-        shuffledWords.forEach(word => {
-            let placed = false;
-            let attempts = 0;
-
-            while (!placed && attempts < 100) {
-                const direction = this.directions[Math.floor(Math.random() * this.directions.length)];
-                const startRow = Math.floor(Math.random() * this.gridSize);
-                const startCol = Math.floor(Math.random() * this.gridSize);
-
-                if (this.canPlaceWord(word, startRow, startCol, direction)) {
-                    this.placeWordInGrid(word, startRow, startCol, direction);
-                    placedWords.push({
-                        word: word,
-                        start: [startRow, startCol],
-                        direction: direction,
-                        category: this.getWordCategory(word)
-                    });
-                    placed = true;
-                }
-                attempts++;
-            }
+        
+        // Place words for all types in grid
+        Object.keys(this.wordsToFind).forEach(soundType => {
+            this.wordsToFind[soundType].forEach(word => {
+                this.placeWordInGrid(word);
+            });
         });
-
-        this.placedWords = placedWords;
-        console.log('Placed words:', placedWords);
+        
+        // Fill remaining cells with random letters
+        this.fillEmptyCells();
     }
-
-    canPlaceWord(word, startRow, startCol, direction) {
-        for (let i = 0; i < word.length; i++) {
-            const row = startRow + direction[0] * i;
-            const col = startCol + direction[1] * i;
-
-            // Check bounds
-            if (row < 0 || row >= this.gridSize || col < 0 || col >= this.gridSize) {
-                return false;
+    
+    placeWordInGrid(word) {
+        let placed = false;
+        let attempts = 0;
+        const maxAttempts = 100;
+        
+        while (!placed && attempts < maxAttempts) {
+            const direction = Math.random() < 0.7 ? 'horizontal' : 'vertical'; // Prefer horizontal
+            const row = Math.floor(Math.random() * this.gridSize);
+            const col = Math.floor(Math.random() * this.gridSize);
+            
+            if (this.canPlaceWord(word, row, col, direction)) {
+                this.insertWord(word, row, col, direction);
+                placed = true;
             }
-
-            // Check if cell is empty or contains the same letter
-            if (this.grid[row][col] !== '' && this.grid[row][col] !== word[i]) {
-                return false;
+            attempts++;
+        }
+        
+        if (!placed) {
+            console.warn(`Could not place word: ${word}`);
+        }
+    }
+    
+    canPlaceWord(word, row, col, direction) {
+        if (direction === 'horizontal') {
+            if (col + word.length > this.gridSize) return false;
+            for (let i = 0; i < word.length; i++) {
+                const existingChar = this.grid[row][col + i];
+                if (existingChar && existingChar !== word[i]) {
+                    return false;
+                }
+            }
+        } else {
+            if (row + word.length > this.gridSize) return false;
+            for (let i = 0; i < word.length; i++) {
+                const existingChar = this.grid[row + i][col];
+                if (existingChar && existingChar !== word[i]) {
+                    return false;
+                }
             }
         }
         return true;
     }
-
-    placeWordInGrid(word, startRow, startCol, direction) {
-        for (let i = 0; i < word.length; i++) {
-            const row = startRow + direction[0] * i;
-            const col = startCol + direction[1] * i;
-            this.grid[row][col] = word[i].toUpperCase();
+    
+    insertWord(word, row, col, direction) {
+        if (direction === 'horizontal') {
+            for (let i = 0; i < word.length; i++) {
+                this.grid[row][col + i] = word[i];
+            }
+        } else {
+            for (let i = 0; i < word.length; i++) {
+                this.grid[row + i][col] = word[i];
+            }
         }
     }
-
+    
     fillEmptyCells() {
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
+        const letters = 'abcdefghijklmnopqrstuvwxyz';
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize; col++) {
-                if (this.grid[row][col] === '') {
+                if (!this.grid[row][col]) {
                     this.grid[row][col] = letters[Math.floor(Math.random() * letters.length)];
                 }
             }
         }
     }
-
-    renderGrid() {
-        const board = document.getElementById('wordSearchBoard');
-        if (!board) return;
-
-        board.innerHTML = '';
-
+    
+    createVisualGrid() {
+        const boardElement = document.getElementById('wordSearchBoard');
+        if (!boardElement) return;
+        
+        boardElement.innerHTML = '';
+        boardElement.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(${this.gridSize}, 1fr);
+            gap: 2px;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        `;
+        
         for (let row = 0; row < this.gridSize; row++) {
             for (let col = 0; col < this.gridSize; col++) {
                 const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.textContent = this.grid[row][col];
+                cell.className = 'grid-cell';
+                cell.textContent = this.grid[row][col].toUpperCase();
                 cell.dataset.row = row;
                 cell.dataset.col = col;
-
-                cell.addEventListener('click', () => this.toggleCell(row, col, cell));
-
-                board.appendChild(cell);
+                
+                cell.style.cssText = `
+                    width: 35px;
+                    height: 35px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, 0.9);
+                    color: #2d3142;
+                    font-weight: bold;
+                    font-size: 16px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    user-select: none;
+                `;
+                
+                // Add event handlers
+                cell.addEventListener('mousedown', (e) => this.startSelection(e));
+                cell.addEventListener('mouseenter', (e) => this.extendSelection(e));
+                cell.addEventListener('mouseup', () => this.endSelection());
+                
+                boardElement.appendChild(cell);
             }
         }
     }
-
-    toggleCell(row, col, cellElement) {
-        const cellIndex = `${row}-${col}`;
-        const existingIndex = this.selectedCells.findIndex(cell => cell.index === cellIndex);
-
-        if (existingIndex >= 0) {
-            // Remove from selection
-            this.selectedCells.splice(existingIndex, 1);
-            cellElement.classList.remove('selected');
-        } else {
-            // Add to selection
-            this.selectedCells.push({
-                index: cellIndex,
-                row: row,
-                col: col,
-                letter: this.grid[row][col],
-                element: cellElement
-            });
-            cellElement.classList.add('selected');
+    
+    selectSound(sound) {
+        if (!this.isGameActive) return;
+        
+        this.selectedSound = sound;
+        
+        // Update button appearance
+        const soundButtons = document.querySelectorAll('.color-mode-button');
+        soundButtons.forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.sound === sound);
+            if (btn.dataset.sound === sound) {
+                btn.style.transform = 'scale(1.1)';
+                btn.style.boxShadow = '0 0 20px rgba(255,255,255,0.5)';
+            } else {
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = 'none';
+            }
+        });
+        
+        // Update UI
+        const selectedSoundDisplay = document.getElementById('selectedSound');
+        if (selectedSoundDisplay) {
+            const soundNames = { t: '/t/ 音 (無聲音)', d: '/d/ 音 (有聲音)', id: '/ɪd/ 音 (額外音節)' };
+            selectedSoundDisplay.textContent = soundNames[sound];
         }
-
-        this.updateSelectedWordDisplay();
-
-        // Play selection sound
+        
+        // Show current target words
+        this.updateCurrentWordsDisplay();
+        
+        // Play sound
         if (window.SoundSystem) {
-            window.SoundSystem.play('click', 0.3);
+            window.SoundSystem.play('click');
         }
     }
-
-    updateSelectedWordDisplay() {
-        const selectedWord = this.selectedCells.map(cell => cell.letter).join('');
-        const display = document.getElementById('selectedWord');
-        if (display) {
-            display.textContent = selectedWord;
+    
+    updateCurrentWordsDisplay() {
+        const display = document.getElementById('currentWordsDisplay');
+        if (!display || !this.selectedSound) return;
+        
+        display.innerHTML = '';
+        const targetWords = this.wordsToFind[this.selectedSound];
+        const foundWords = this.foundWords[this.selectedSound];
+        const remainingWords = targetWords.filter(word => !foundWords.includes(word));
+        
+        // Show only the first 3 remaining words (since we only need 3)
+        remainingWords.slice(0, 3).forEach(word => {
+            const wordItem = document.createElement('div');
+            wordItem.textContent = word;
+            wordItem.style.cssText = `
+                background: rgba(255,255,255,0.8);
+                color: #2d3142;
+                padding: 8px 15px;
+                border-radius: 20px;
+                font-weight: bold;
+                font-size: 16px;
+            `;
+            display.appendChild(wordItem);
+        });
+        
+        if (remainingWords.length === 0) {
+            const completedMsg = document.createElement('div');
+            completedMsg.textContent = '✅ 此類型已完成！';
+            completedMsg.style.cssText = `
+                background: #2ecc71;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-weight: bold;
+            `;
+            display.appendChild(completedMsg);
         }
     }
-
-    confirmSelection() {
-        if (this.selectedCells.length === 0) {
-            this.showFeedback(false, '請先選擇字母組成單詞');
+    
+    startSelection(e) {
+        if (!this.selectedSound) {
+            this.gameSystem.showMessage('請先選擇發音類型！', 2000);
             return;
         }
-
-        const selectedWord = this.selectedCells.map(cell => cell.letter).join('').toLowerCase();
-        const correctCategory = this.getWordCategory(selectedWord);
-
-        if (correctCategory) {
-            // Check if word matches current mode
-            if (correctCategory === this.currentMode) {
-                this.handleCorrectAnswer(selectedWord, correctCategory);
-            } else {
-                this.handleWrongCategory(selectedWord, correctCategory);
-            }
-        } else {
-            this.handleInvalidWord(selectedWord);
+        
+        this.clearSelection();
+        this.isSelecting = true;
+        this.addCellToSelection(e.target);
+    }
+    
+    extendSelection(e) {
+        if (this.isSelecting) {
+            this.addCellToSelection(e.target);
         }
     }
-
-    handleCorrectAnswer(word, category) {
-        // Mark word as found
-        this.foundWords.add(word);
-        this.questionsCorrect[category]++;
-
-        // Mark cells as found
-        this.selectedCells.forEach(cell => {
-            cell.element.classList.remove('selected');
-            cell.element.classList.add('found');
+    
+    endSelection() {
+        this.isSelecting = false;
+        this.updateCurrentWord();
+    }
+    
+    addCellToSelection(cell) {
+        if (!cell.classList.contains('grid-cell')) return;
+        
+        const row = parseInt(cell.dataset.row);
+        const col = parseInt(cell.dataset.col);
+        
+        // Check if cell is already selected
+        const existing = this.selectedCells.find(c => c.row === row && c.col === col);
+        if (existing) return;
+        
+        this.selectedCells.push({ row, col, element: cell });
+        cell.style.background = '#4ecca3';
+        cell.style.color = 'white';
+        cell.style.transform = 'scale(1.1)';
+    }
+    
+    updateCurrentWord() {
+        this.currentWord = this.selectedCells
+            .map(cell => this.grid[cell.row][cell.col])
+            .join('').toLowerCase();
+            
+        const selectedWordDisplay = document.getElementById('selectedWord');
+        if (selectedWordDisplay) {
+            selectedWordDisplay.textContent = this.currentWord;
+        }
+    }
+    
+    confirmWord() {
+        if (!this.currentWord || !this.selectedSound) return;
+        
+        const targetWords = this.wordsToFind[this.selectedSound];
+        const foundWordsForType = this.foundWords[this.selectedSound];
+        
+        if (targetWords.includes(this.currentWord) && !foundWordsForType.includes(this.currentWord)) {
+            // Check if we still need words for this type
+            if (foundWordsForType.length < 3) {
+                foundWordsForType.push(this.currentWord);
+                this.score += 15;
+                this.gameSystem.updateScore('wordSearch', 15, false);
+                
+                // Mark found cells
+                this.selectedCells.forEach(cell => {
+                    cell.element.style.background = '#2ecc71';
+                    cell.element.classList.add('found-word');
+                });
+                
+                // Play success sound and pronunciation
+                if (window.SoundSystem) {
+                    window.SoundSystem.play('correct');
+                    setTimeout(() => this.pronounceWord(), 500);
+                }
+                
+                this.gameSystem.showMessage(`✅ 找到: ${this.currentWord}! (+15分)`, 2500);
+                
+                // Check if this type is completed
+                if (foundWordsForType.length === 3) {
+                    this.completeBridgeSegment(this.selectedSound);
+                }
+                
+                this.updateUI();
+                this.checkGameCompletion();
+            } else {
+                this.gameSystem.showMessage('此類型已經完成了！請選擇其他類型。', 2000);
+            }
+        } else if (foundWordsForType.includes(this.currentWord)) {
+            this.gameSystem.showMessage('這個單詞已經找到了！', 2000);
+        } else {
+            this.gameSystem.showMessage('不是目標單詞或發音類型錯誤！', 2000);
+            if (window.SoundSystem) {
+                window.SoundSystem.play('wrong');
+            }
+        }
+        
+        this.clearSelection();
+    }
+    
+    completeBridgeSegment(soundType) {
+        this.bridgeSegments[soundType].completed = true;
+        
+        const typeNames = {
+            t: '/t/ 音段',
+            d: '/d/ 音段', 
+            id: '/ɪd/ 音段'
+        };
+        
+        this.gameSystem.showMessage(`🌉 ${typeNames[soundType]} 修復完成！橋樑的一段已經建好了！`, 4000);
+        
+        // Update bridge visual
+        this.updateBridgeVisual();
+        
+        // Play special completion sound
+        if (window.SoundSystem) {
+            setTimeout(() => window.SoundSystem.play('correct', 1.5), 500);
+        }
+    }
+    
+    updateBridgeVisual() {
+        const canvas = document.getElementById('bridgeCanvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw sky gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(1, '#4682B4');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw cliff edges
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(0, 120, 150, 80);
+        ctx.fillRect(650, 120, 150, 80);
+        
+        // Draw player
+        ctx.fillStyle = '#4ecca3';
+        ctx.fillRect(120, 100, 25, 40);
+        ctx.fillStyle = '#fdbcb4';
+        ctx.beginPath();
+        ctx.arc(132, 90, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw bridge segments
+        const segmentWidth = 150;
+        const bridgeY = 140;
+        const segments = ['t', 'd', 'id'];
+        
+        segments.forEach((segment, index) => {
+            const x = 150 + (index * segmentWidth);
+            const isCompleted = this.bridgeSegments[segment].completed;
+            
+            if (isCompleted) {
+                // Draw solid bridge segment
+                ctx.fillStyle = '#708090';
+                ctx.fillRect(x, bridgeY, segmentWidth, 20);
+                ctx.strokeStyle = '#2F4F4F';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, bridgeY, segmentWidth, 20);
+                
+                // Add sparkles
+                for (let i = 0; i < 5; i++) {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(x + 20 + (i * 25), bridgeY + 10, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else {
+                // Draw broken/incomplete segment
+                ctx.strokeStyle = 'rgba(112, 128, 144, 0.5)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([10, 10]);
+                ctx.strokeRect(x, bridgeY, segmentWidth, 20);
+                ctx.setLineDash([]);
+            }
         });
-
-        // Update score
-        this.gameSystem.updateScore('wordSearch', 10, false);
-
-        // Update word list display
-        this.updateWordInList(word, true);
-
-        // Show feedback
-        const explanation = this.getExplanation(category);
-        this.showFeedback(true, '正確！', `"${word}" 的結尾發音是 /${category}/ ${explanation}`);
-
-        // Update bridge
-        this.updateBridge(category);
-
-        // Check completion
-        this.checkGameCompletion();
-
-        this.clearSelection();
+        
+        // Draw gap indicator if bridge not complete
+        if (!this.isGameComplete()) {
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('修復中...', canvas.width / 2, bridgeY - 10);
+        }
     }
-
-    handleWrongCategory(word, correctCategory) {
-        // Must clear selection before trying again
-        this.clearSelection();
-
-        const explanation = this.getExplanation(correctCategory);
-        this.showFeedback(false, '發音類型不正確', 
-            `"${word}" 的正確發音是 /${correctCategory}/, ${explanation}\n請先清除選擇，然後選擇正確的發音類型。`);
-
-        // Force user to clear selection
-        this.selectedCells.forEach(cell => {
-            cell.element.classList.add('wrong-selection');
-        });
-    }
-
-    handleInvalidWord(word) {
-        this.showFeedback(false, '無效單詞', `"${word}" 不在單詞列表中，請重新選擇。`);
-        this.clearSelection();
-    }
-
+    
     clearSelection() {
         this.selectedCells.forEach(cell => {
-            cell.element.classList.remove('selected', 'wrong-selection');
+            if (!cell.element.classList.contains('found-word')) {
+                cell.element.style.background = 'rgba(255, 255, 255, 0.9)';
+                cell.element.style.color = '#2d3142';
+                cell.element.style.transform = 'scale(1)';
+            }
         });
+        
         this.selectedCells = [];
-        this.updateSelectedWordDisplay();
-    }
-
-    pronounceSelected() {
-        const selectedWord = this.selectedCells.map(cell => cell.letter).join('').toLowerCase();
-        if (selectedWord && window.SoundSystem) {
-            window.SoundSystem.speakWord(selectedWord);
+        this.currentWord = '';
+        
+        const selectedWordDisplay = document.getElementById('selectedWord');
+        if (selectedWordDisplay) {
+            selectedWordDisplay.textContent = '-';
         }
     }
-
-    getWordCategory(word) {
-        for (const [category, words] of Object.entries(this.words)) {
-            if (words.includes(word)) {
-                return category;
-            }
+    
+    pronounceWord() {
+        if (this.currentWord && window.SoundSystem) {
+            window.SoundSystem.speakWord(this.currentWord);
         }
-        return null;
     }
-
-    getExplanation(category) {
-        const explanations = {
-            t: '因為結尾是無聲輔音',
-            d: '因為結尾是有聲輔音或元音',
-            id: '因為結尾已經是 /t/ 或 /d/ 音'
-        };
-        return explanations[category] || '';
-    }
-
-    updateWordLists() {
-        ['t', 'd', 'id'].forEach(category => {
-            const container = document.getElementById(`${category}Words`);
-            if (container && this.words[category]) {
-                container.innerHTML = this.words[category].map(word => 
-                    `<div class="word-item" id="word-${word}" data-word="${word}">${word}</div>`
-                ).join('');
+    
+    updateUI() {
+        // Update progress bars
+        Object.keys(this.bridgeSegments).forEach(type => {
+            const progressElement = document.querySelector(`[data-type="${type}"] .progress-fill`);
+            const countElement = document.querySelector(`[data-type="${type}"] .word-count`);
+            
+            if (progressElement && countElement) {
+                const found = this.foundWords[type].length;
+                const needed = this.bridgeSegments[type].wordsNeeded;
+                const percentage = (found / needed) * 100;
+                
+                progressElement.style.width = percentage + '%';
+                countElement.textContent = found;
+                
+                // Change color when completed
+                if (found >= needed) {
+                    progressElement.style.background = '#2ecc71';
+                    countElement.parentElement.style.color = '#2ecc71';
+                }
             }
         });
+        
+        // Update current words display
+        this.updateCurrentWordsDisplay();
+        
+        // Update bridge visual
+        this.updateBridgeVisual();
     }
-
-    updateWordInList(word, found) {
-        const wordElement = document.getElementById(`word-${word}`);
-        if (wordElement) {
-            wordElement.classList.toggle('found', found);
-        }
+    
+    isGameComplete() {
+        return Object.keys(this.bridgeSegments).every(type => 
+            this.bridgeSegments[type].completed
+        );
     }
-
-    showBridgeScene() {
-        const cutscene = document.getElementById('game1Cutscene');
-        if (cutscene) {
-            // Initialize bridge stones
-            const bridgeContainer = document.getElementById('stoneBridges');
-            if (bridgeContainer) {
-                bridgeContainer.innerHTML = '';
-
-                // Create bridge stones for each category
-                ['t', 'd', 'id'].forEach((category, index) => {
-                    for (let i = 0; i < 3; i++) {
-                        const stone = document.createElement('div');
-                        stone.className = `bridge-stone stone-${category}`;
-                        stone.style.left = `${index * 30 + i * 10}%`;
-                        stone.dataset.category = category;
-                        stone.dataset.index = i;
-                        bridgeContainer.appendChild(stone);
-                    }
-                });
-            }
-
-            cutscene.classList.add('active');
-
-            // Auto-hide after 8 seconds
-            setTimeout(() => {
-                cutscene.classList.remove('active');
-            }, 8000);
-        }
-    }
-
-    updateBridge(category) {
-        const stones = document.querySelectorAll(`.bridge-stone.stone-${category}`);
-        const correctCount = this.questionsCorrect[category];
-
-        stones.forEach((stone, index) => {
-            if (index < correctCount) {
-                stone.classList.add('active');
-            }
-        });
-    }
-
+    
     checkGameCompletion() {
-        const totalRequired = this.requiredCorrect * 3; // 3 categories × 3 correct each
-        const totalCorrect = Object.values(this.questionsCorrect).reduce((a, b) => a + b, 0);
-
-        if (totalCorrect >= totalRequired) {
-            // Show completion cutscene
-            this.showCompletionScene();
-
-            // Check if score is high enough for artifact
-            this.gameSystem.checkLevelCompletion('wordSearch');
+        if (this.isGameComplete()) {
+            this.completeGame();
         }
     }
-
-    showCompletionScene() {
-        const message = '太棒了！你成功建造了石橋，可以安全通過懸崖了！';
-        this.showFeedback(true, '關卡完成！', message, 5000);
-
-        // Animate bridge completion
-        const allStones = document.querySelectorAll('.bridge-stone');
-        allStones.forEach((stone, index) => {
-            setTimeout(() => {
-                stone.classList.add('active');
-            }, index * 200);
-        });
-    }
-
-    showFeedback(isCorrect, title, message, duration = 3000) {
-        const feedback = document.getElementById('feedback');
-        if (!feedback) return;
-
-        feedback.className = `feedback show ${isCorrect ? 'correct' : 'wrong'}`;
-        feedback.innerHTML = `
-            <div class="feedback-title">${title}</div>
-            <div class="feedback-message">${message}</div>
-        `;
-
+    
+    completeGame() {
+        this.isGameActive = false;
+        
+        // Show victory message
+        const message = '🎉 橋樑修復完成！你現在可以安全通過了！<br>恭喜完成單詞搜索任務！';
+        this.gameSystem.showMessage(message, 5000);
+        
+        // Animate complete bridge
+        this.animateVictory();
+        
+        // Complete the level
         setTimeout(() => {
-            feedback.classList.remove('show');
-        }, duration);
+            this.gameSystem.checkLevelCompletion('wordSearch');
+        }, 3000);
+    }
+    
+    animateVictory() {
+        const canvas = document.getElementById('bridgeCanvas');
+        if (!canvas) return;
+        
+        let frame = 0;
+        const animate = () => {
+            this.updateBridgeVisual();
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Add victory sparkles
+            for (let i = 0; i < 10; i++) {
+                const x = 150 + Math.random() * 450;
+                const y = 120 + Math.random() * 40;
+                const size = 2 + Math.random() * 3;
+                
+                ctx.fillStyle = frame % 20 < 10 ? '#FFD700' : '#FFF';
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Move player across bridge
+            const playerX = 120 + (frame * 3);
+            if (playerX < 700) {
+                ctx.fillStyle = '#4ecca3';
+                ctx.fillRect(playerX, 100, 25, 40);
+                ctx.fillStyle = '#fdbcb4';
+                ctx.beginPath();
+                ctx.arc(playerX + 12, 90, 12, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            frame++;
+            if (frame < 200) {
+                requestAnimationFrame(animate);
+            }
+        };
+        
+        animate();
+    }
+    
+    stopGame() {
+        this.isGameActive = false;
+        this.clearSelection();
+        
+        const canvas = document.getElementById('bridgeCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     }
 }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Wait for game system to be ready
     const checkGameSystem = () => {
         if (window.gameSystem) {
             window.wordSearchGame = new WordSearchGame(window.gameSystem);
-            console.log('Word Search game initialized');
+            console.log('Word Search Bridge Repair game initialized');
         } else {
             setTimeout(checkGameSystem, 100);
         }
