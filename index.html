@@ -5,139 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Past Tense Pronunciation Adventure</title>
     
-    <!-- 🚨 FAVICON FIX - No more 404 errors! -->
-    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A4ecca+Pi4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/j4+P/5OTkav///wDi4uL/4ecca/Pi4v/z8/P/8/Pz//Pz8//z8/P/8/Pz//Pz8//z8/P/8/Pz//Pz8//z8/P/4ecca//i4uL/////AOLi4v/j4+P/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/j4+P/4uLi/////wDi4uL/4+Pj//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/4+Pj/+Li4v////8A">
+    <!-- FAVICON FIX - No more 404 errors -->
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A">
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/games.css">
     
-    <!-- Enhanced CSS for video controls and fixes -->
     <style>
         .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(45deg, #2c3e50, #3498db);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-family: Arial, sans-serif;
-            z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: Arial, sans-serif; z-index: 10000;
         }
-        
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-top: 5px solid #4ecca3;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            width: 50px; height: 50px; border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #4ecca3; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* SIMPLE VIDEO CONTAINER STYLING */
+        .story-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; z-index: 1000;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-family: Arial, sans-serif;
-            z-index: 10001;
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .error-details {
-            background: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            max-width: 600px;
-        }
-        
-        .debug-info {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #00ff00;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            z-index: 9999;
-            max-width: 300px;
-            display: none;
-        }
-        
-        /* 🎬 Enhanced Video Player Styling */
         .video-wrapper {
-            position: relative;
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 100%; max-width: 900px; background: #000; border-radius: 15px; 
+            overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
+        /* ENHANCED VIDEO STYLING */
         .video-wrapper video {
-            width: 100%;
-            height: auto;
-            display: block;
+            width: 100%; height: auto; display: block; background: #000;
         }
         
-        /* Enhanced video control buttons */
+        /* CLEAR, VISIBLE BUTTON STYLING */
+        .video-controls {
+            background: rgba(0,0,0,0.8); padding: 20px; text-align: center;
+            border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;
+        }
+        
         .video-control-btn {
-            background: rgba(0,0,0,0.8);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            margin: 5px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        
-        .video-control-btn:hover {
-            background: rgba(76, 204, 163, 0.9);
-            transform: translateY(-2px);
+            background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none;
+            padding: 15px 30px; margin: 10px; border-radius: 10px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s ease; min-width: 150px;
             box-shadow: 0 5px 15px rgba(76, 204, 163, 0.4);
         }
         
-        /* 🎯 Fix for Game 1 stuck background images */
-        .game-container.word-search-active .cutscene-container {
-            display: none !important;
+        .video-control-btn:hover {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            transform: translateY(-3px); box-shadow: 0 8px 25px rgba(76, 204, 163, 0.6);
         }
         
-        /* Hide problematic background images that cause stuck screens */
-        .background-img {
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
+        .video-control-btn.secondary {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
         }
         
-        /* If images fail to load, hide them */
-        .background-img[src=""] {
-            display: none;
+        .video-control-btn.secondary:hover {
+            background: linear-gradient(45deg, #e67e22, #d35400);
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.6);
+        }
+        
+        .error-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #e74c3c, #c0392b); display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: Arial, sans-serif; z-index: 10001; text-align: center; padding: 40px;
         }
     </style>
 </head>
@@ -154,25 +93,9 @@
     <!-- Error Screen -->
     <div id="errorScreen" class="error-screen">
         <h1>🚨 載入錯誤</h1>
-        <div class="error-details">
-            <h3>遊戲載入失敗</h3>
-            <div id="errorMessage">Unknown error occurred</div>
-            <div id="errorDetails" style="margin-top: 15px; font-size: 14px; color: #ffcccc;"></div>
-        </div>
-        <button onclick="location.reload()" style="
-            background: #3498db; color: white; border: none; padding: 15px 30px; 
-            border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px;">
-            🔄 重新載入
-        </button>
-        <button onclick="toggleDebugInfo()" style="
-            background: #f39c12; color: white; border: none; padding: 15px 30px; 
-            border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px;">
-            🔧 顯示偵錯資訊
-        </button>
+        <div id="errorMessage">Unknown error occurred</div>
+        <button onclick="location.reload()" style="background: #3498db; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px;">🔄 重新載入</button>
     </div>
-    
-    <!-- Debug Info Panel -->
-    <div id="debugInfo" class="debug-info"></div>
     
     <!-- Settings Panel -->
     <div id="settingsPanel" class="settings-panel" style="display: none;">
@@ -216,23 +139,23 @@
         </div>
     </div>
 
-    <!-- 🎬 Story Container - ENHANCED VIDEO PLAYER -->
+    <!-- FIXED STORY CONTAINER WITH CLEAR VIDEO CONTROLS -->
     <div id="storyContainer" class="story-container" style="display: none;">
         <div class="video-wrapper">
-            <!-- 🚨 FIXED: Added full video player controls -->
+            <!-- VIDEO WITH FULL BROWSER CONTROLS -->
             <video id="introVideo" 
                    controls 
-                   controlslist="nodownload" 
                    preload="metadata" 
-                   width="100%" 
-                   height="auto"
-                   style="background: #000;">
+                   style="width: 100%; height: auto; background: #000;">
                 <source src="assets/video/intro.mp4" type="video/mp4">
-                <p>您的瀏覽器不支援 video 標籤。將顯示動畫介紹...</p>
+                <p>您的瀏覽器不支援 video 標籤。</p>
             </video>
-            <div class="story-controls">
-                <button id="skipIntro" class="video-control-btn">⏭️ Skip</button>
-                <button id="continueStory" class="video-control-btn">▶️ Continue</button>
+            
+            <!-- CLEAR, VISIBLE CONTROL BUTTONS -->
+            <div class="video-controls">
+                <h3 style="color: white; margin: 0 0 15px 0;">🎬 故事介紹</h3>
+                <button id="skipIntro" class="video-control-btn secondary">⏭️ 跳過介紹</button>
+                <button id="continueStory" class="video-control-btn">▶️ 開始遊戲</button>
             </div>
         </div>
     </div>
@@ -308,23 +231,16 @@
             <button class="back-btn" id="gameMenuBackBtn">🏠 返回大廳</button>
         </div>
 
-        <!-- 🎯 Game 1: Word Search - FIXED to prevent stuck background images -->
+        <!-- Game 1: Word Search -->
         <div id="wordSearch" class="game-container" style="display: none;">
             <h2>🔍 單詞搜索遊戲</h2>
             <div class="instructions">在網格中找到過去式單詞，選擇正確的發音類型</div>
             
-            <!-- 🚨 FIXED: Cutscene container with error handling for images -->
             <div class="cutscene-container" id="game1Cutscene" style="display: none;">
                 <div class="cutscene-content cliff-scene">
-                    <img src="assets/images/cliff-background.jpg" 
-                         alt="懸崖場景" 
-                         class="background-img"
-                         onerror="this.style.display='none';"
-                         onload="console.log('✅ Game 1 background loaded')">
+                    <img src="assets/images/cliff-background.jpg" alt="懸崖場景" class="background-img" onerror="this.style.display='none';">
                     <div class="character-sprite" id="playerSprite">
-                        <img src="assets/images/player-sprite.png" 
-                             alt="角色"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/player-sprite.png" alt="角色" onerror="this.style.display='none';">
                     </div>
                     <div class="stone-bridges" id="stoneBridges"></div>
                     <div class="cutscene-text">
@@ -376,14 +292,9 @@
             
             <div class="cutscene-container" id="game2Cutscene">
                 <div class="cutscene-content stone-rain-scene">
-                    <img src="assets/images/cave-background.jpg" 
-                         alt="洞穴場景" 
-                         class="background-img"
-                         onerror="this.style.display='none';">
+                    <img src="assets/images/cave-background.jpg" alt="洞穴場景" class="background-img" onerror="this.style.display='none';">
                     <div class="character-sprite" id="swordPlayer">
-                        <img src="assets/images/warrior-sprite.png" 
-                             alt="劍士"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/warrior-sprite.png" alt="劍士" onerror="this.style.display='none';">
                     </div>
                     <div class="falling-stones" id="fallingStones"></div>
                     <div class="cutscene-text">
@@ -416,19 +327,12 @@
             
             <div class="cutscene-container" id="game3Cutscene">
                 <div class="cutscene-content hypnosis-scene">
-                    <img src="assets/images/wizard-lair.jpg" 
-                         alt="巫師巢穴" 
-                         class="background-img"
-                         onerror="this.style.display='none';">
+                    <img src="assets/images/wizard-lair.jpg" alt="巫師巢穴" class="background-img" onerror="this.style.display='none';">
                     <div class="character-sprite" id="hypnotizedPlayer">
-                        <img src="assets/images/player-hypnotized.png" 
-                             alt="被催眠的角色"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/player-hypnotized.png" alt="被催眠的角色" onerror="this.style.display='none';">
                     </div>
                     <div class="character-sprite" id="evilWizard">
-                        <img src="assets/images/wizard-sprite.png" 
-                             alt="邪惡巫師"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/wizard-sprite.png" alt="邪惡巫師" onerror="this.style.display='none';">
                     </div>
                     <div class="hypnosis-effects" id="hypnosisEffects"></div>
                     <div class="cutscene-text">
@@ -462,19 +366,12 @@
             
             <div class="cutscene-container" id="bossCutscene">
                 <div class="cutscene-content boss-arena">
-                    <img src="assets/images/boss-arena.jpg" 
-                         alt="Boss戰場" 
-                         class="background-img"
-                         onerror="this.style.display='none';">
+                    <img src="assets/images/boss-arena.jpg" alt="Boss戰場" class="background-img" onerror="this.style.display='none';">
                     <div class="character-sprite" id="bossCharacter">
-                        <img src="assets/images/pronunciation-king.png" 
-                             alt="發音之王"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/pronunciation-king.png" alt="發音之王" onerror="this.style.display='none';">
                     </div>
                     <div class="character-sprite" id="finalPlayer">
-                        <img src="assets/images/hero-final.png" 
-                             alt="最終英雄"
-                             onerror="this.style.display='none';">
+                        <img src="assets/images/hero-final.png" alt="最終英雄" onerror="this.style.display='none';">
                     </div>
                     <div class="battle-effects" id="battleEffects"></div>
                     <div class="cutscene-text">
@@ -504,23 +401,23 @@
             <button class="back-btn" id="bossFightBackBtn">🏠 返回選單</button>
         </div>
 
-        <!-- 🎬 Ending Container - ENHANCED VIDEO PLAYER -->
+        <!-- ENDING CONTAINER WITH CLEAR VIDEO CONTROLS -->
         <div id="endingContainer" class="ending-container" style="display: none;">
             <div class="video-wrapper">
-                <!-- 🚨 FIXED: Added full video player controls -->
+                <!-- VIDEO WITH FULL BROWSER CONTROLS -->
                 <video id="endingVideo" 
                        controls 
-                       controlslist="nodownload" 
                        preload="metadata" 
-                       width="100%" 
-                       height="auto"
-                       style="background: #000;">
+                       style="width: 100%; height: auto; background: #000;">
                     <source src="assets/video/ending.mp4" type="video/mp4">
-                    <p>您的瀏覽器不支援 video 標籤。將顯示恭喜畫面...</p>
+                    <p>您的瀏覽器不支援 video 標籤。</p>
                 </video>
-                <div class="ending-controls">
+                
+                <!-- CLEAR, VISIBLE CONTROL BUTTONS -->
+                <div class="video-controls">
+                    <h3 style="color: white; margin: 0 0 15px 0;">🎉 恭喜完成遊戲！</h3>
                     <button id="playAgain" class="video-control-btn">🔄 再玩一次</button>
-                    <button id="backToMenu" class="video-control-btn">🏠 返回主選單</button>
+                    <button id="backToMenu" class="video-control-btn secondary">🏠 返回主選單</button>
                 </div>
             </div>
         </div>
@@ -528,92 +425,65 @@
     </div>
 
     <!-- Audio Elements -->
-    <audio id="bgmAudio" loop>
-        <source src="assets/audio/bgm.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="correctSound">
-        <source src="assets/audio/correct.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="wrongSound">
-        <source src="assets/audio/wrong.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="clickSound">
-        <source src="assets/audio/click.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgmAudio" loop><source src="assets/audio/bgm.mp3" type="audio/mpeg"></audio>
+    <audio id="correctSound"><source src="assets/audio/correct.mp3" type="audio/mpeg"></audio>
+    <audio id="wrongSound"><source src="assets/audio/wrong.mp3" type="audio/mpeg"></audio>
+    <audio id="clickSound"><source src="assets/audio/click.mp3" type="audio/mpeg"></audio>
 
-    <!-- 🔧 Enhanced Loading and Error Handling Script -->
+    <!-- SIMPLIFIED SCRIPT LOADING -->
     <script>
-        console.log('🎮 Starting Enhanced Game System Load...');
+        console.log('🎮 Starting Language Quest Adventure...');
         
-        // Enhanced loading system
         const LoadingManager = {
-            scriptsLoaded: 0,
-            totalScripts: 8,
-            errors: [],
-            startTime: Date.now(),
+            scriptsLoaded: 0, totalScripts: 8, errors: [], startTime: Date.now(),
             
             updateStatus(message) {
                 const statusElement = document.getElementById('loadingStatus');
-                if (statusElement) {
-                    statusElement.textContent = message;
-                }
-                console.log('📊', message);
-            },
-            
-            updateProgress() {
-                this.scriptsLoaded++;
-                const progress = Math.round((this.scriptsLoaded / this.totalScripts) * 100);
-                this.updateStatus(`載入中... ${progress}% (${this.scriptsLoaded}/${this.totalScripts})`);
+                if (statusElement) statusElement.textContent = message;
+                console.log('📊 Loading:', message);
             },
             
             scriptLoaded(scriptName) {
-                this.updateProgress();
-                console.log('✅ Script loaded:', scriptName);
+                this.scriptsLoaded++;
+                const progress = Math.round((this.scriptsLoaded / this.totalScripts) * 100);
+                this.updateStatus(`載入中... ${progress}% (${this.scriptsLoaded}/${this.totalScripts})`);
+                console.log('✅ Loaded:', scriptName);
+                if (this.scriptsLoaded >= this.totalScripts) this.allScriptsLoaded();
             },
             
             scriptError(scriptName, error) {
-                this.errors.push({ script: scriptName, error: error });
-                this.updateProgress();
-                console.error('❌ Script failed:', scriptName, error);
+                this.errors.push({ script: scriptName, error });
+                console.error('❌ Failed to load:', scriptName, error);
+                this.showError('腳本載入失敗', error);
             },
             
             allScriptsLoaded() {
                 const loadTime = Date.now() - this.startTime;
                 console.log(`🎉 All scripts loaded in ${loadTime}ms`);
-                
-                if (this.errors.length > 0) {
-                    this.showError('部分腳本載入失敗', this.errors);
-                    return;
-                }
-                
-                // Initialize game system
-                this.initializeGameSystem();
-            },
-            
-            initializeGameSystem() {
-                this.updateStatus('初始化遊戲系統...');
+                this.updateStatus('正在初始化遊戲系統...');
                 
                 setTimeout(() => {
                     try {
-                        if (window.gameSystem && typeof window.gameSystem.showMainMenu === 'function') {
+                        if (window.gameSystem) {
                             this.hideLoadingScreen();
-                            console.log('🎮 Game System ready!');
+                            console.log('🎮 Game System Ready!');
                         } else {
-                            throw new Error('GameSystem not properly initialized');
+                            throw new Error('GameSystem not initialized');
                         }
                     } catch (error) {
-                        this.showError('遊戲系統初始化失敗', error);
+                        this.showError('遊戲系統初始化失敗', error.message);
                     }
                 }, 1000);
             },
             
             hideLoadingScreen() {
                 const loadingScreen = document.getElementById('loadingScreen');
+                const gameContainer = document.getElementById('gameContainer');
                 if (loadingScreen) {
                     loadingScreen.style.opacity = '0';
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
-                        document.getElementById('gameContainer').style.display = 'block';
+                        if (gameContainer) gameContainer.style.display = 'block';
                     }, 500);
                 }
             },
@@ -621,82 +491,24 @@
             showError(title, details) {
                 const errorScreen = document.getElementById('errorScreen');
                 const errorMessage = document.getElementById('errorMessage');
-                const errorDetails = document.getElementById('errorDetails');
-                const loadingScreen = document.getElementById('loadingScreen');
-                
                 if (errorScreen && errorMessage) {
-                    errorMessage.textContent = title;
-                    
-                    if (errorDetails && details) {
-                        if (Array.isArray(details)) {
-                            errorDetails.innerHTML = details.map(err => 
-                                `<div>❌ ${err.script}: ${err.error}</div>`
-                            ).join('');
-                        } else {
-                            errorDetails.textContent = details.toString();
-                        }
-                    }
-                    
-                    if (loadingScreen) loadingScreen.style.display = 'none';
+                    errorMessage.textContent = `${title}: ${details}`;
+                    document.getElementById('loadingScreen').style.display = 'none';
                     errorScreen.style.display = 'flex';
                 }
             }
         };
         
-        // Enhanced script loading with error handling
         function loadScript(src, name) {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
-                script.src = src;
-                script.async = false; // Maintain order
-                
-                script.onload = () => {
-                    LoadingManager.scriptLoaded(name);
-                    resolve();
-                };
-                
-                script.onerror = (error) => {
-                    LoadingManager.scriptError(name, `Failed to load ${src}`);
-                    reject(error);
-                };
-                
+                script.src = src; script.async = false;
+                script.onload = () => { LoadingManager.scriptLoaded(name); resolve(); };
+                script.onerror = (error) => { LoadingManager.scriptError(name, `404 - ${src}`); reject(error); };
                 document.head.appendChild(script);
             });
         }
         
-        // Debug info functions
-        function toggleDebugInfo() {
-            const debugInfo = document.getElementById('debugInfo');
-            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
-            updateDebugInfo();
-        }
-        
-        function updateDebugInfo() {
-            const debugInfo = document.getElementById('debugInfo');
-            if (debugInfo.style.display === 'block') {
-                debugInfo.innerHTML = `
-                    <strong>Debug Information:</strong><br>
-                    GameSystem: ${window.gameSystem ? '✅ Loaded' : '❌ Missing'}<br>
-                    Scripts Loaded: ${LoadingManager.scriptsLoaded}/${LoadingManager.totalScripts}<br>
-                    Errors: ${LoadingManager.errors.length}<br>
-                    Load Time: ${Date.now() - LoadingManager.startTime}ms<br>
-                    User Agent: ${navigator.userAgent.substring(0, 50)}...
-                `;
-            }
-        }
-        
-        // Error handling
-        window.addEventListener('error', (e) => {
-            LoadingManager.scriptError('Runtime', e.message);
-            console.error('Runtime Error:', e);
-        });
-        
-        window.addEventListener('unhandledrejection', (e) => {
-            LoadingManager.scriptError('Promise', e.reason);
-            console.error('Unhandled Promise Rejection:', e);
-        });
-        
-        // Start loading scripts in correct order
         async function loadAllScripts() {
             const scripts = [
                 { src: 'js/wordDatabase.js', name: 'WordDatabase' },
@@ -710,137 +522,121 @@
             ];
             
             try {
-                for (const script of scripts) {
-                    await loadScript(script.src, script.name);
-                }
+                for (const script of scripts) await loadScript(script.src, script.name);
                 LoadingManager.allScriptsLoaded();
             } catch (error) {
                 LoadingManager.showError('腳本載入失敗', error);
             }
         }
         
-        // Initialize when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadAllScripts);
-        } else {
-            loadAllScripts();
-        }
-        
-        // 🎬 Enhanced video and button setup
+        // SETUP VIDEO PLAYERS AND BUTTONS
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🔧 Setting up enhanced video players and button handlers');
+            console.log('🎬 Setting up video players and button handlers');
             
-            // Setup video players with enhanced controls
+            // Video event listeners
             const introVideo = document.getElementById('introVideo');
             const endingVideo = document.getElementById('endingVideo');
             
             if (introVideo) {
                 introVideo.addEventListener('loadedmetadata', () => {
-                    console.log('✅ Intro video loaded with full player controls (pause, volume, seek, fullscreen)');
+                    console.log('✅ Intro video loaded - controls available: play, pause, volume, seek');
                 });
                 
-                introVideo.addEventListener('error', (e) => {
-                    console.log('⚠️ Intro video not found - will use animated story');
+                introVideo.addEventListener('error', () => {
+                    console.log('⚠️ Intro video not found - buttons still work');
                 });
                 
                 introVideo.addEventListener('ended', () => {
-                    console.log('🎬 Intro video ended - auto-proceeding to game menu');
+                    console.log('🎬 Intro video ended - auto-proceeding to game');
                     setTimeout(() => {
                         document.getElementById('storyContainer').style.display = 'none';
-                        if (window.gameSystem) {
-                            window.gameSystem.showGameMenu();
-                        }
+                        if (window.gameSystem) window.gameSystem.showGameMenu();
                     }, 1000);
                 });
             }
             
             if (endingVideo) {
                 endingVideo.addEventListener('loadedmetadata', () => {
-                    console.log('✅ Ending video loaded with full player controls (pause, volume, seek, fullscreen)');
-                });
-                
-                endingVideo.addEventListener('error', (e) => {
-                    console.log('⚠️ Ending video not found - will use congratulations screen');
+                    console.log('✅ Ending video loaded - controls available: play, pause, volume, seek');
                 });
             }
             
-            // Enhanced button handlers
-            const setupFallbackHandlers = () => {
-                // Back button handlers with IDs
-                const backButtons = [
-                    { id: 'collectionsBackBtn', action: () => window.gameSystem?.showMainMenu() },
-                    { id: 'gameMenuBackBtn', action: () => window.gameSystem?.showMainMenu() },
-                    { id: 'wordSearchBackBtn', action: () => {
-                        // 🎯 Fix: Hide cutscene when going back from word search
-                        const cutscene = document.getElementById('game1Cutscene');
-                        if (cutscene) cutscene.style.display = 'none';
-                        window.gameSystem?.showGameMenu();
-                    }},
-                    { id: 'fallingWordsBackBtn', action: () => window.gameSystem?.showGameMenu() },
-                    { id: 'multipleChoiceBackBtn', action: () => window.gameSystem?.showGameMenu() },
-                    { id: 'bossFightBackBtn', action: () => window.gameSystem?.showGameMenu() }
-                ];
-                
-                backButtons.forEach(btn => {
-                    const element = document.getElementById(btn.id);
-                    if (element) {
-                        element.onclick = btn.action;
-                        console.log(`✅ Button handler set: ${btn.id}`);
-                    }
-                });
-                
-                // Video control handlers
-                const skipIntroBtn = document.getElementById('skipIntro');
-                const continueStoryBtn = document.getElementById('continueStory');
-                const playAgainBtn = document.getElementById('playAgain');
-                const backToMenuBtn = document.getElementById('backToMenu');
-                
-                if (skipIntroBtn) {
-                    skipIntroBtn.onclick = () => {
-                        console.log('Skip intro clicked');
-                        document.getElementById('storyContainer').style.display = 'none';
-                        if (window.gameSystem) {
-                            window.gameSystem.showGameMenu();
-                        }
-                    };
+            // BUTTON HANDLERS - DIRECT AND SIMPLE
+            document.getElementById('skipIntro').onclick = () => {
+                console.log('⏭️ Skip intro clicked');
+                document.getElementById('storyContainer').style.display = 'none';
+                if (window.gameSystem) {
+                    window.gameSystem.showGameMenu();
+                } else {
+                    // Fallback
+                    document.getElementById('gameContainer').style.display = 'block';
+                    setTimeout(() => {
+                        const gameMenu = document.getElementById('gameMenu');
+                        if (gameMenu) gameMenu.style.display = 'block';
+                    }, 100);
                 }
-                
-                if (continueStoryBtn) {
-                    continueStoryBtn.onclick = () => {
-                        console.log('Continue story clicked');
-                        document.getElementById('storyContainer').style.display = 'none';
-                        if (window.gameSystem) {
-                            window.gameSystem.showGameMenu();
-                        }
-                    };
-                }
-                
-                if (playAgainBtn) {
-                    playAgainBtn.onclick = () => {
-                        console.log('Play again clicked');
-                        window.location.reload();
-                    };
-                }
-                
-                if (backToMenuBtn) {
-                    backToMenuBtn.onclick = () => {
-                        console.log('Back to menu clicked');
-                        document.getElementById('endingContainer').style.display = 'none';
-                        if (window.gameSystem) {
-                            window.gameSystem.showMainMenu();
-                        }
-                    };
-                }
-                
-                console.log('✅ All enhanced button handlers set up successfully');
             };
             
-            // Set up handlers immediately
-            setupFallbackHandlers();
+            document.getElementById('continueStory').onclick = () => {
+                console.log('▶️ Continue story clicked');
+                document.getElementById('storyContainer').style.display = 'none';
+                if (window.gameSystem) {
+                    window.gameSystem.showGameMenu();
+                } else {
+                    // Fallback
+                    document.getElementById('gameContainer').style.display = 'block';
+                    setTimeout(() => {
+                        const gameMenu = document.getElementById('gameMenu');
+                        if (gameMenu) gameMenu.style.display = 'block';
+                    }, 100);
+                }
+            };
             
-            // Set up again after scripts load
-            setTimeout(setupFallbackHandlers, 2000);
+            document.getElementById('playAgain').onclick = () => {
+                console.log('🔄 Play again clicked');
+                window.location.reload();
+            };
+            
+            document.getElementById('backToMenu').onclick = () => {
+                console.log('🏠 Back to menu clicked');
+                document.getElementById('endingContainer').style.display = 'none';
+                if (window.gameSystem) {
+                    window.gameSystem.showMainMenu();
+                }
+            };
+            
+            // Back button handlers
+            const backButtons = [
+                { id: 'collectionsBackBtn', action: () => window.gameSystem?.showMainMenu() },
+                { id: 'gameMenuBackBtn', action: () => window.gameSystem?.showMainMenu() },
+                { id: 'wordSearchBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                { id: 'fallingWordsBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                { id: 'multipleChoiceBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                { id: 'bossFightBackBtn', action: () => window.gameSystem?.showGameMenu() }
+            ];
+            
+            backButtons.forEach(btn => {
+                const element = document.getElementById(btn.id);
+                if (element) {
+                    element.onclick = btn.action;
+                    console.log(`✅ Button handler: ${btn.id}`);
+                }
+            });
+            
+            console.log('✅ All video players and buttons set up successfully');
         });
+        
+        // Error handling
+        window.addEventListener('error', (e) => console.error('Runtime Error:', e.error));
+        
+        // Start initialization
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAllScripts);
+        } else {
+            loadAllScripts();
+        }
+        
+        console.log('📋 Script loaded successfully');
     </script>
 
 </body>
