@@ -83,6 +83,9 @@
             display: none;
             min-height: 100vh;
             padding: 20px;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
         
         .screen.active {
@@ -92,7 +95,21 @@
             justify-content: center;
         }
         
+        /* 主選單背景 */
+        #mainMenuScreen {
+            background-image: url('assets/images/all-artifacts-ready.png');
+            background-size: cover;
+            background-position: center;
+        }
+        
         /* 主選單 */
+        .main-menu {
+            background: rgba(0,0,0,0.7);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
         .main-menu h1 {
             font-size: 2.5em;
             margin-bottom: 30px;
@@ -206,7 +223,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #2c3e50, #34495e);
+            background-size: cover;
+            background-position: center;
             z-index: 1000;
             display: none;
             align-items: center;
@@ -224,6 +242,7 @@
             background: rgba(0,0,0,0.8);
             border-radius: 20px;
             border: 3px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
         }
         
         .cutscene-title {
@@ -240,7 +259,35 @@
             color: white;
         }
         
+        .cutscene-character {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: characterFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes characterFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
         /* 遊戲選單 */
+        #gameMenuScreen {
+            background-image: url('assets/images/cave-background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .game-menu {
+            background: rgba(0,0,0,0.7);
+            padding: 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
         .game-menu h1 {
             font-size: 2.2em;
             margin-bottom: 30px;
@@ -270,6 +317,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            backdrop-filter: blur(10px);
         }
         
         .game-button:hover:not(.locked) {
@@ -331,18 +379,11 @@
         .game-container {
             width: 100%;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
             color: white;
             padding: 20px;
-        }
-        
-        /* 拖拽選擇樣式 */
-        .drag-selection {
-            position: absolute;
-            border: 2px dashed #4ecca3;
-            background: rgba(76, 204, 163, 0.2);
-            pointer-events: none;
-            z-index: 10;
+            position: relative;
         }
         
         /* 字母網格 */
@@ -357,6 +398,7 @@
             margin: 0 auto;
             position: relative;
             user-select: none;
+            backdrop-filter: blur(10px);
         }
         
         .letter-cell {
@@ -404,66 +446,48 @@
         }
         
         /* 遊戲2 - 戰士樣式 */
-        .warrior-character {
+        .game-area-2 {
+            background-image: url('assets/images/cliff-background.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .player-character {
             position: absolute;
             bottom: 50px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
+            width: 80px;
             height: 80px;
+            background-image: url('assets/images/player-sprite.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             z-index: 100;
+            transition: left 0.1s ease;
         }
         
-        .warrior-head {
-            width: 30px;
-            height: 30px;
-            background: #fdbcb4;
-            border-radius: 50%;
-            margin: 0 auto;
-            border: 3px solid #333;
-            position: relative;
+        .player-character.hypnotized {
+            background-image: url('assets/images/player-hypnotized.png');
+            filter: sepia(100%) hue-rotate(280deg);
         }
         
-        .warrior-head::after {
-            content: '⚔️';
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 20px;
-        }
-        
-        .warrior-body {
-            width: 35px;
-            height: 40px;
-            background: linear-gradient(45deg, #8b5cf6, #7c3aed);
-            border-radius: 15px;
-            margin: 5px auto;
-            border: 3px solid #333;
-            position: relative;
-        }
-        
-        .sword {
+        .sword-indicator {
             position: absolute;
             top: -30px;
-            right: -20px;
-            width: 6px;
-            height: 60px;
-            background: linear-gradient(180deg, #fbbf24, #f59e0b, #d97706);
-            border-radius: 3px;
-            transform-origin: bottom center;
-            transition: transform 0.3s;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 30px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 101;
         }
         
-        .sword.slash {
-            animation: swordSlash 0.5s ease-out;
-        }
-        
-        @keyframes swordSlash {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(-90deg); }
-            100% { transform: rotate(0deg); }
-        }
+        .sword-t { background-image: url('assets/images/artifact-time-controller.png'); }
+        .sword-d { background-image: url('assets/images/artifact-knowledge-gem.png'); }
+        .sword-id { background-image: url('assets/images/artifact-energy-eye.png'); }
         
         .falling-word {
             position: absolute;
@@ -472,9 +496,9 @@
             color: white;
             font-weight: bold;
             text-align: center;
-            animation: wordFall linear;
             cursor: pointer;
             transition: all 0.2s;
+            backdrop-filter: blur(5px);
         }
         
         .falling-word:hover {
@@ -482,18 +506,24 @@
             box-shadow: 0 0 20px rgba(255,255,255,0.5);
         }
         
-        .falling-word.t-type { background: linear-gradient(45deg, #3498db, #2980b9); }
-        .falling-word.d-type { background: linear-gradient(45deg, #e74c3c, #c0392b); }
-        .falling-word.id-type { background: linear-gradient(45deg, #2ecc71, #27ae60); }
-        
-        @keyframes wordFall {
-            from { top: -50px; }
-            to { top: 100vh; }
+        .falling-word.t-type { 
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        .falling-word.d-type { 
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+        }
+        .falling-word.id-type { 
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
         }
         
         /* Boss戰樣式 */
         .boss-arena {
-            background: radial-gradient(circle, #4c1d95 0%, #1e1b4b 100%);
+            background-image: url('assets/images/boss-arena.jpg');
+            background-size: cover;
+            background-position: center;
             min-height: 100vh;
             position: relative;
             overflow: hidden;
@@ -506,63 +536,16 @@
             transform: translateX(-50%);
             width: 200px;
             height: 250px;
+            background-image: url('assets/images/pronunciation-king.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             animation: bossFloat 3s ease-in-out infinite;
         }
         
         @keyframes bossFloat {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(-20px); }
-        }
-        
-        .boss-head {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, #7c2d12, #991b1b);
-            border-radius: 50%;
-            margin: 0 auto;
-            border: 5px solid #1f2937;
-            position: relative;
-        }
-        
-        .boss-head::after {
-            content: '👑';
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 40px;
-        }
-        
-        .boss-body {
-            width: 120px;
-            height: 150px;
-            background: linear-gradient(45deg, #4c1d95, #7c3aed);
-            border-radius: 20px;
-            margin: 10px auto;
-            border: 5px solid #1f2937;
-            position: relative;
-        }
-        
-        .boss-arms {
-            position: absolute;
-            top: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .boss-arm {
-            width: 25px;
-            height: 80px;
-            background: linear-gradient(45deg, #7c2d12, #991b1b);
-            border-radius: 12px;
-            transform-origin: top center;
-            animation: armWave 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes armWave {
-            0% { transform: rotate(-20deg); }
-            100% { transform: rotate(20deg); }
         }
         
         .boss-health {
@@ -575,6 +558,7 @@
             background: rgba(255,255,255,0.2);
             border-radius: 10px;
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
         
         .boss-health-bar {
@@ -587,9 +571,8 @@
         
         .artifact {
             position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -597,6 +580,9 @@
             cursor: pointer;
             transition: all 0.3s;
             animation: artifactGlow 2s ease-in-out infinite;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
         
         @keyframes artifactGlow {
@@ -608,9 +594,9 @@
             transform: scale(1.2);
         }
         
-        .artifact.t-artifact { background: linear-gradient(45deg, #3498db, #2980b9); color: white; }
-        .artifact.d-artifact { background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; }
-        .artifact.id-artifact { background: linear-gradient(45deg, #2ecc71, #27ae60); color: white; }
+        .artifact.t-artifact { background-image: url('assets/images/artifact-time-controller.png'); }
+        .artifact.d-artifact { background-image: url('assets/images/artifact-knowledge-gem.png'); }
+        .artifact.id-artifact { background-image: url('assets/images/artifact-energy-eye.png'); }
         
         /* 按鈕樣式 */
         .sound-btn, .control-btn {
@@ -622,6 +608,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 5px;
+            backdrop-filter: blur(10px);
         }
         
         .sound-btn:hover, .control-btn:hover {
@@ -650,6 +637,7 @@
             text-align: center;
             font-size: 12px;
             font-weight: bold;
+            backdrop-filter: blur(5px);
         }
         
         .word-item.found {
@@ -681,6 +669,7 @@
             animation: messageSlide 0.3s ease-out;
             max-width: 90vw;
             text-align: center;
+            backdrop-filter: blur(10px);
         }
         
         .message.error {
@@ -706,6 +695,58 @@
             }
         }
         
+        /* HUD樣式 */
+        .game-hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 999;
+        }
+        
+        .sword-selection {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            z-index: 999;
+        }
+        
+        .sword-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .sword-btn:hover {
+            border-color: #4ecca3;
+            transform: scale(1.1);
+        }
+        
+        .sword-btn.active {
+            border-color: #4ecca3;
+            box-shadow: 0 0 15px #4ecca3;
+        }
+        
+        .sword-btn.t-sword { background-image: url('assets/images/artifact-time-controller.png'); }
+        .sword-btn.d-sword { background-image: url('assets/images/artifact-knowledge-gem.png'); }
+        .sword-btn.id-sword { background-image: url('assets/images/artifact-energy-eye.png'); }
+        
         /* 響應式設計 */
         @media (max-width: 768px) {
             .game-grid {
@@ -726,10 +767,30 @@
                 height: 28px;
                 font-size: 12px;
             }
+            
+            .sword-selection {
+                bottom: 10px;
+                padding: 10px;
+            }
+            
+            .sword-btn {
+                width: 40px;
+                height: 40px;
+            }
         }
     </style>
 </head>
 <body>
+    
+    <!-- 背景音樂 -->
+    <audio id="bgmAudio" loop>
+        <source src="assets/audio/bgm.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 音效 -->
+    <audio id="clickSound" preload="auto"><source src="assets/audio/click.mp3" type="audio/mpeg"></audio>
+    <audio id="correctSound" preload="auto"><source src="assets/audio/correct.mp3" type="audio/mpeg"></audio>
+    <audio id="wrongSound" preload="auto"><source src="assets/audio/wrong.mp3" type="audio/mpeg"></audio>
     
     <!-- 載入畫面 -->
     <div id="loadingScreen">
@@ -779,10 +840,12 @@
             <!-- 結束影片 -->
             <video id="endingVideo" controls preload="metadata">
                 <source src="assets/video/ending.mp4" type="video/mp4">
-                <p style="color: white; padding: 20px; text-align: center;">
-                    🎉 恭喜完成冒險！<br>
-                    您的瀏覽器不支援影片播放。
-                </p>
+                <div style="width: 100%; height: 400px; background-image: url('assets/images/hero-final.png'); background-size: contain; background-repeat: no-repeat; background-position: center; display: flex; align-items: center; justify-content: center; color: white; text-align: center; padding: 40px;">
+                    <div>
+                        <h2 style="font-size: 2em; margin-bottom: 20px;">🎉 恭喜完成冒險！</h2>
+                        <p style="font-size: 18px;">您已成為真正的發音大師！</p>
+                    </div>
+                </div>
             </video>
             <div class="video-controls">
                 <h3 style="color: white; margin: 0 0 15px 0;" id="endingVideoTitle">🎉 冒險完成！</h3>
@@ -796,6 +859,7 @@
     <!-- 過場動畫 -->
     <div id="cutsceneContainer" class="cutscene">
         <div class="cutscene-content">
+            <div class="cutscene-character" id="cutsceneCharacter"></div>
             <h2 class="cutscene-title" id="cutsceneTitle">章節標題</h2>
             <p class="cutscene-text" id="cutsceneText">故事內容...</p>
             <button id="cutsceneContinue" class="video-control-btn">▶️ 繼續</button>
@@ -840,6 +904,65 @@
     <script>
         console.log('🎮 開始遊戲初始化...');
         
+        // 音效管理器
+        class AudioManager {
+            constructor() {
+                this.bgm = document.getElementById('bgmAudio');
+                this.clickSound = document.getElementById('clickSound');
+                this.correctSound = document.getElementById('correctSound');
+                this.wrongSound = document.getElementById('wrongSound');
+                this.isMuted = false;
+                this.bgmVolume = 0.3;
+                this.sfxVolume = 0.7;
+                
+                this.bgm.volume = this.bgmVolume;
+                this.clickSound.volume = this.sfxVolume;
+                this.correctSound.volume = this.sfxVolume;
+                this.wrongSound.volume = this.sfxVolume;
+            }
+            
+            playBGM() {
+                if (!this.isMuted) {
+                    this.bgm.currentTime = 0;
+                    this.bgm.play().catch(e => console.log('BGM播放被阻擋'));
+                }
+            }
+            
+            stopBGM() {
+                this.bgm.pause();
+            }
+            
+            playClick() {
+                if (!this.isMuted) {
+                    this.clickSound.currentTime = 0;
+                    this.clickSound.play().catch(e => {});
+                }
+            }
+            
+            playCorrect() {
+                if (!this.isMuted) {
+                    this.correctSound.currentTime = 0;
+                    this.correctSound.play().catch(e => {});
+                }
+            }
+            
+            playWrong() {
+                if (!this.isMuted) {
+                    this.wrongSound.currentTime = 0;
+                    this.wrongSound.play().catch(e => {});
+                }
+            }
+            
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                if (this.isMuted) {
+                    this.bgm.volume = 0;
+                } else {
+                    this.bgm.volume = this.bgmVolume;
+                }
+            }
+        }
+        
         // 全域遊戲狀態
         window.gameState = {
             currentLanguage: 'zh',
@@ -856,7 +979,10 @@
             initialized: false
         };
         
-        // 翻譯系統 - 修復版本
+        // 全域音效管理器
+        window.audioManager = new AudioManager();
+        
+        // 翻譯系統
         window.translations = {
             zh: {
                 // 主選單
@@ -917,7 +1043,16 @@
                 // 其他
                 none: "無",
                 pleaseSelect: "請選擇",
-                sound: "音"
+                sound: "音",
+                
+                // 遊戲2相關
+                chooseSword: "選擇劍 (J/K/L):",
+                currentSword: "當前劍:",
+                movement: "移動 (W/A/S/D):",
+                
+                // 遊戲3相關
+                consecutiveCorrect: "連續答對:",
+                totalQuestions: "問題"
             },
             en: {
                 // 主選單
@@ -978,7 +1113,16 @@
                 // 其他
                 none: "None",
                 pleaseSelect: "Please select",
-                sound: "sound"
+                sound: "sound",
+                
+                // 遊戲2相關
+                chooseSword: "Choose Sword (J/K/L):",
+                currentSword: "Current Sword:",
+                movement: "Movement (W/A/S/D):",
+                
+                // 遊戲3相關
+                consecutiveCorrect: "Consecutive correct:",
+                totalQuestions: "Question"
             }
         };
         
@@ -1015,14 +1159,27 @@
                 }
             }
             
-            showCutscene(title, text, callback) {
+            showCutscene(title, text, backgroundImage, characterImage, callback) {
+                const cutscene = document.getElementById('cutsceneContainer');
+                cutscene.style.backgroundImage = backgroundImage ? `url('${backgroundImage}')` : '';
+                
                 document.getElementById('cutsceneTitle').textContent = title;
                 document.getElementById('cutsceneText').textContent = text;
-                document.getElementById('cutsceneContainer').classList.add('active');
+                
+                const characterEl = document.getElementById('cutsceneCharacter');
+                if (characterImage) {
+                    characterEl.style.backgroundImage = `url('${characterImage}')`;
+                    characterEl.style.display = 'block';
+                } else {
+                    characterEl.style.display = 'none';
+                }
+                
+                cutscene.classList.add('active');
                 
                 const continueBtn = document.getElementById('cutsceneContinue');
                 continueBtn.onclick = () => {
-                    document.getElementById('cutsceneContainer').classList.remove('active');
+                    window.audioManager.playClick();
+                    cutscene.classList.remove('active');
                     if (callback) callback();
                 };
             }
@@ -1040,12 +1197,23 @@
                 console.log('🎮 遊戲系統初始化中');
                 this.setupEventListeners();
                 this.updateGameProgress();
-                // 設置預設語言
                 this.updateLanguage('zh');
+                
+                // 啟動BGM
+                setTimeout(() => {
+                    window.audioManager.playBGM();
+                }, 1000);
             }
             
             setupEventListeners() {
                 console.log('🔧 設置遊戲系統事件監聽器');
+                
+                // 為所有按鈕添加點擊音效
+                document.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.classList.contains('clickable')) {
+                        window.audioManager.playClick();
+                    }
+                });
                 
                 // 主選單按鈕
                 document.getElementById('startGameBtn').onclick = () => this.showStory();
@@ -1093,6 +1261,7 @@
                 console.log('📋 顯示主選單');
                 this.stopAllVideos();
                 this.screenManager.showScreen('mainMenuScreen');
+                window.audioManager.playBGM();
             }
             
             showStory() {
@@ -1199,8 +1368,8 @@
                 const progress = window.gameState.gameProgress[gameId];
                 
                 if (!progress.unlocked) {
-                    const t = window.translations[window.gameState.currentLanguage];
-                    this.showMessage(window.gameState.currentLanguage === 'zh' ? '請先完成前面的遊戲才能解鎖！' : 'Please complete previous games to unlock!', 'warning');
+                    const message = window.gameState.currentLanguage === 'zh' ? '請先完成前面的遊戲才能解鎖！' : 'Please complete previous games to unlock!';
+                    this.showMessage(message, 'warning');
                     return;
                 }
                 
@@ -1218,25 +1387,33 @@
             }
             
             showGameCutscene(gameId, callback) {
-                let title, text;
+                let title, text, backgroundImage, characterImage;
                 
                 if (window.gameState.currentLanguage === 'zh') {
                     switch(gameId) {
                         case 'wordSearch':
                             title = '🌉 第一章：斷橋修復';
                             text = '古老的發音橋樑被邪惡法師破壞了！你必須找到正確的過去式單詞並按發音分類，才能修復橋樑繼續前進。';
+                            backgroundImage = 'assets/images/cliff-background.jpg';
+                            characterImage = 'assets/images/player-sprite.png';
                             break;
                         case 'fallingWords':
                             title = '⚔️ 第二章：岩石法師戰';
                             text = '邪惡的岩石法師用魔法石塊攻擊你！使用你的劍切開帶有正確發音的石塊，擊敗法師獲得發音神器。';
+                            backgroundImage = 'assets/images/cliff-background.jpg';
+                            characterImage = 'assets/images/warrior-sprite.png';
                             break;
                         case 'multipleChoice':
                             title = '🧙‍♂️ 第三章：夢魘法師戰';
-                            text = '夢魘法師用催眠術迷惑了你的心智！你必須連續答對5題才能從催眠中醒來，擊敗法師並奪取最後的神器。';
+                            text = '夢魘法師用催眠術迷惑了你的心智！你必須連續答對5題才能醒來並擊敗法師，奪取最後的神器。';
+                            backgroundImage = 'assets/images/cave-background.jpg';
+                            characterImage = 'assets/images/player-hypnotized.png';
                             break;
                         case 'bossFight':
                             title = '👑 最終章：發音之王';
                             text = '你已經收集齊所有三個發音神器！現在面對最終Boss - 發音之王。運用你掌握的所有發音知識擊敗他，成為真正的發音大師！';
+                            backgroundImage = 'assets/images/boss-arena.jpg';
+                            characterImage = 'assets/images/pronunciation-king.png';
                             break;
                     }
                 } else {
@@ -1244,23 +1421,31 @@
                         case 'wordSearch':
                             title = '🌉 Chapter 1: Bridge Repair';
                             text = 'The ancient pronunciation bridge has been destroyed by evil wizards! You must find the correct past tense words and classify them by pronunciation to repair the bridge and continue forward.';
+                            backgroundImage = 'assets/images/cliff-background.jpg';
+                            characterImage = 'assets/images/player-sprite.png';
                             break;
                         case 'fallingWords':
                             title = '⚔️ Chapter 2: Rock Wizard Battle';
                             text = 'The evil rock wizard attacks you with magical stone blocks! Use your sword to slice through blocks with the correct pronunciation, defeat the wizard and obtain the pronunciation artifact.';
+                            backgroundImage = 'assets/images/cliff-background.jpg';
+                            characterImage = 'assets/images/warrior-sprite.png';
                             break;
                         case 'multipleChoice':
                             title = '🧙‍♂️ Chapter 3: Nightmare Wizard Battle';
-                            text = 'The nightmare wizard has hypnotized your mind! You must answer 5 questions correctly in a row to wake up from the hypnosis, defeat the wizard and seize the final artifact.';
+                            text = 'The nightmare wizard has hypnotized your mind! You must answer 5 questions correctly in a row to wake up, defeat the wizard and seize the final artifact.';
+                            backgroundImage = 'assets/images/cave-background.jpg';
+                            characterImage = 'assets/images/player-hypnotized.png';
                             break;
                         case 'bossFight':
                             title = '👑 Final Chapter: Pronunciation King';
                             text = 'You have collected all three pronunciation artifacts! Now face the final boss - the Pronunciation King. Use all your pronunciation knowledge to defeat him and become a true pronunciation master!';
+                            backgroundImage = 'assets/images/boss-arena.jpg';
+                            characterImage = 'assets/images/pronunciation-king.png';
                             break;
                     }
                 }
                 
-                this.screenManager.showCutscene(title, text, callback);
+                this.screenManager.showCutscene(title, text, backgroundImage, characterImage, callback);
             }
             
             loadGameContent(gameId) {
@@ -1281,8 +1466,10 @@
                 console.log('🔍 載入單詞搜索遊戲');
                 const t = window.translations[window.gameState.currentLanguage];
                 
+                container.style.backgroundImage = 'url("assets/images/cliff-background.jpg")';
+                
                 container.innerHTML = `
-                    <div style="min-height: 100vh; color: white; padding: 20px;">
+                    <div style="min-height: 100vh; color: white; padding: 20px; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);">
                         <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 20px;">${t.bridgeRepair}</h1>
                         
                         <!-- 進度顯示 -->
@@ -1311,7 +1498,7 @@
                         </div>
                         
                         <!-- 發音選擇 -->
-                        <div style="text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                        <div style="text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
                             <div style="margin-bottom: 15px; font-size: 16px; font-weight: bold;">${t.selectSound}</div>
                             <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                                 <button class="sound-btn" data-sound="t" style="background: #3498db;">🔵 /t/ ${t.sound}</button>
@@ -1329,7 +1516,7 @@
                         </div>
                         
                         <!-- 控制區域 -->
-                        <div style="text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                        <div style="text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; backdrop-filter: blur(10px);">
                             <div style="margin-bottom: 15px; font-size: 16px;">
                                 ${t.selectedWord} <span id="selectedWord" style="color: #fbbf24; font-weight: bold; font-size: 18px;">${t.none}</span>
                             </div>
@@ -1343,15 +1530,15 @@
                         
                         <!-- 已找到的單詞 -->
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 600px; margin: 0 auto;">
-                            <div style="background: rgba(52, 152, 219, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #3498db;">
+                            <div style="background: rgba(52, 152, 219, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #3498db; backdrop-filter: blur(10px);">
                                 <h4 style="color: #3498db; margin: 0 0 10px 0; text-align: center;">🔵 /t/ ${t.foundWords}</h4>
                                 <div id="foundWordsT" style="min-height: 60px;"></div>
                             </div>
-                            <div style="background: rgba(231, 76, 60, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #e74c3c;">
+                            <div style="background: rgba(231, 76, 60, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #e74c3c; backdrop-filter: blur(10px);">
                                 <h4 style="color: #e74c3c; margin: 0 0 10px 0; text-align: center;">🔴 /d/ ${t.foundWords}</h4>
                                 <div id="foundWordsD" style="min-height: 60px;"></div>
                             </div>
-                            <div style="background: rgba(46, 204, 113, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #2ecc71;">
+                            <div style="background: rgba(46, 204, 113, 0.2); padding: 15px; border-radius: 10px; border: 2px solid #2ecc71; backdrop-filter: blur(10px);">
                                 <h4 style="color: #2ecc71; margin: 0 0 10px 0; text-align: center;">🟢 /ɪd/ ${t.foundWords}</h4>
                                 <div id="foundWordsID" style="min-height: 60px;"></div>
                             </div>
@@ -1366,55 +1553,56 @@
                 console.log('⚔️ 載入岩石法師戰');
                 const t = window.translations[window.gameState.currentLanguage];
                 
+                container.className = 'game-container game-area-2';
+                
                 container.innerHTML = `
-                    <div style="min-height: 100vh; background: linear-gradient(180deg, #1e3a8a 0%, #1e1b4b 100%); color: white; padding: 20px; position: relative;">
+                    <div style="min-height: 100vh; color: white; padding: 20px; position: relative; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px);">
                         <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 20px;">${t.rockWizardBattle}</h1>
                         
-                        <p style="text-align: center; font-size: 18px; margin-bottom: 30px;">
-                            ${window.gameState.currentLanguage === 'zh' ? '用你的劍斬開正確發音的石塊！達到200分擊敗法師！' : 'Use your sword to slice blocks with correct pronunciation! Score 200 to defeat the wizard!'}
-                        </p>
-                        
-                        <!-- 遊戲統計 -->
-                        <div style="display: flex; justify-content: center; gap: 30px; margin-bottom: 20px; flex-wrap: wrap;">
-                            <div style="text-align: center;">
-                                <div style="color: #4ecca3; font-size: 20px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '得分' : 'Score'}</div>
-                                <div id="fallingScore" style="font-size: 28px;">0</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: #f39c12; font-size: 20px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '時間' : 'Time'}</div>
-                                <div id="fallingTime" style="font-size: 28px;">90</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: #e74c3c; font-size: 20px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '生命' : 'Lives'}</div>
-                                <div id="fallingLives" style="font-size: 28px;">❤️❤️❤️</div>
-                            </div>
-                        </div>
-                        
-                        <!-- 目標選擇 -->
-                        <div style="text-align: center; margin-bottom: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
-                            <div style="margin-bottom: 10px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '選擇目標發音:' : 'Choose target pronunciation:'}</div>
-                            <div style="display: flex; justify-content: center; gap: 10px;">
-                                <button class="falling-sound-btn" data-sound="t" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🔵 /t/</button>
-                                <button class="falling-sound-btn" data-sound="d" style="background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🔴 /d/</button>
-                                <button class="falling-sound-btn" data-sound="id" style="background: #2ecc71; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">🟢 /ɪd/</button>
-                            </div>
-                            <div id="currentTarget" style="margin-top: 10px; font-size: 16px; color: #fbbf24;">${window.gameState.currentLanguage === 'zh' ? '目標: /t/ 音' : 'Target: /t/ sound'}</div>
-                        </div>
-                        
-                        <!-- 遊戲區域 -->
-                        <div id="gameArea" style="position: relative; height: 500px; background: rgba(0,0,0,0.3); border-radius: 15px; margin: 0 auto; max-width: 600px; overflow: hidden;">
-                            <!-- 戰士角色 -->
-                            <div class="warrior-character" id="warrior">
-                                <div class="warrior-head"></div>
-                                <div class="warrior-body">
-                                    <div class="sword" id="sword"></div>
+                        <!-- 遊戲HUD -->
+                        <div class="game-hud">
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div style="text-align: center;">
+                                    <div style="color: #4ecca3; font-size: 16px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '得分' : 'Score'}</div>
+                                    <div id="fallingScore" style="font-size: 24px;">0</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #f39c12; font-size: 16px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '時間' : 'Time'}</div>
+                                    <div id="fallingTime" style="font-size: 24px;">90</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #e74c3c; font-size: 16px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '生命' : 'Lives'}</div>
+                                    <div id="fallingLives" style="font-size: 24px;">❤️❤️❤️</div>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- 劍選擇HUD -->
+                        <div class="sword-selection">
+                            <div style="text-align: center; margin-bottom: 10px; font-size: 14px; font-weight: bold;">
+                                ${t.chooseSword}
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <div class="sword-btn t-sword active" data-sword="t" data-key="j"></div>
+                                <div class="sword-btn d-sword" data-sword="d" data-key="k"></div>
+                                <div class="sword-btn id-sword" data-sword="id" data-key="l"></div>
+                            </div>
+                            <div style="text-align: center; margin-top: 5px; font-size: 12px; opacity: 0.8;">
+                                J - /t/    K - /d/    L - /ɪd/
+                            </div>
+                        </div>
+                        
+                        <!-- 遊戲區域 -->
+                        <div id="gameArea" style="position: relative; height: 500px; background: rgba(0,0,0,0.3); border-radius: 15px; margin: 50px auto; max-width: 600px; overflow: hidden; backdrop-filter: blur(10px);">
+                            <!-- 玩家角色 -->
+                            <div class="player-character" id="player">
+                                <div class="sword-indicator sword-t" id="swordIndicator"></div>
+                            </div>
+                        </div>
+                        
                         <!-- 控制說明 -->
-                        <div style="text-align: center; margin: 20px 0; font-size: 14px; color: rgba(255,255,255,0.8);">
-                            ${window.gameState.currentLanguage === 'zh' ? '使用 A/D 鍵或方向鍵移動，空白鍵斬擊，或直接點擊位置移動並攻擊' : 'Use A/D keys or arrow keys to move, Space to slash, or click to move and attack'}
+                        <div style="text-align: center; margin: 20px 0; font-size: 14px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            ${window.gameState.currentLanguage === 'zh' ? 'WASD移動玩家，JKL切換劍類型，點擊單詞攻擊' : 'WASD to move player, JKL to switch sword types, click words to attack'}
                         </div>
                         
                         <!-- 控制按鈕 -->
@@ -1433,13 +1621,23 @@
                 console.log('🧙‍♂️ 載入夢魘法師戰');
                 const t = window.translations[window.gameState.currentLanguage];
                 
+                container.style.backgroundImage = 'url("assets/images/cave-background.jpg")';
+                
                 container.innerHTML = `
-                    <div style="min-height: 100vh; background: radial-gradient(circle, #4c1d95 0%, #1e1b4b 100%); color: white; padding: 20px; text-align: center;">
+                    <div style="min-height: 100vh; color: white; padding: 20px; text-align: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
                         <h1 style="font-size: 2.5em; margin-bottom: 20px;">${t.nightmareWizard}</h1>
                         
-                        <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; max-width: 600px; margin: 0 auto;">
-                            <div id="mcProgress" style="margin-bottom: 20px; font-size: 18px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '連續答對:' : 'Consecutive correct:'} <span id="mcStreak">0</span>/5</div>
-                            <div id="mcTotalProgress" style="margin-bottom: 20px; font-size: 16px;">${window.gameState.currentLanguage === 'zh' ? '問題' : 'Question'} <span id="mcCurrent">1</span>/15</div>
+                        <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; max-width: 600px; margin: 0 auto; backdrop-filter: blur(10px);">
+                            <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 20px;">
+                                <div style="text-align: center;">
+                                    <div style="color: #4ecca3; font-size: 18px; font-weight: bold;">${t.consecutiveCorrect}</div>
+                                    <div id="mcStreak" style="font-size: 32px; color: #4ecca3;">0</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #f39c12; font-size: 18px; font-weight: bold;">${t.totalQuestions}</div>
+                                    <div id="mcCurrent" style="font-size: 32px; color: #f39c12;">1</div>
+                                </div>
+                            </div>
                             
                             <div id="mcWord" style="font-size: 48px; margin: 30px 0; color: #4ecca3; font-weight: bold;">PLAYED</div>
                             
@@ -1466,8 +1664,6 @@
                                     🟢 /ɪd/ ${t.sound} ${window.gameState.currentLanguage === 'zh' ? '(如: wanted, needed)' : '(e.g., wanted, needed)'}
                                 </button>
                             </div>
-                            
-                            <div id="mcScore" style="font-size: 20px; font-weight: bold;">${window.gameState.currentLanguage === 'zh' ? '總得分:' : 'Total Score:'} <span style="color: #4ecca3;" id="mcScoreValue">0</span></div>
                         </div>
                         
                         <div style="margin-top: 30px;">
@@ -1487,20 +1683,14 @@
                 console.log('👑 載入最終Boss戰');
                 const t = window.translations[window.gameState.currentLanguage];
                 
+                container.className = 'game-container boss-arena';
+                
                 container.innerHTML = `
-                    <div class="boss-arena" style="padding: 20px; text-align: center;">
+                    <div style="padding: 20px; text-align: center; background: rgba(0,0,0,0.3); min-height: 100vh;">
                         <h1 style="font-size: 2.5em; margin-bottom: 20px; color: #fbbf24;">${t.finalBoss}</h1>
                         
                         <!-- Boss角色 -->
-                        <div class="boss-character" id="bossCharacter">
-                            <div class="boss-head"></div>
-                            <div class="boss-body">
-                                <div class="boss-arms">
-                                    <div class="boss-arm"></div>
-                                    <div class="boss-arm"></div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="boss-character" id="bossCharacter"></div>
                         
                         <!-- Boss血量 -->
                         <div class="boss-health">
@@ -1509,13 +1699,13 @@
                         
                         <!-- 神器顯示 -->
                         <div style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px;">
-                            <div class="artifact t-artifact" id="tArtifact" style="display: ${window.gameState.artifacts.t ? 'flex' : 'none'};">🔵</div>
-                            <div class="artifact d-artifact" id="dArtifact" style="display: ${window.gameState.artifacts.d ? 'flex' : 'none'};">🔴</div>
-                            <div class="artifact id-artifact" id="idArtifact" style="display: ${window.gameState.artifacts.id ? 'flex' : 'none'};">🟢</div>
+                            <div class="artifact t-artifact" id="tArtifact" style="display: ${window.gameState.artifacts.t ? 'flex' : 'none'};"></div>
+                            <div class="artifact d-artifact" id="dArtifact" style="display: ${window.gameState.artifacts.d ? 'flex' : 'none'};"></div>
+                            <div class="artifact id-artifact" id="idArtifact" style="display: ${window.gameState.artifacts.id ? 'flex' : 'none'};"></div>
                         </div>
                         
                         <!-- 戰鬥狀態 -->
-                        <div style="position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px; min-width: 400px;">
+                        <div style="position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); padding: 20px; border-radius: 15px; min-width: 400px; backdrop-filter: blur(10px);">
                             <div id="bossPhase" style="font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #fbbf24;">${window.gameState.currentLanguage === 'zh' ? '第一階段' : 'Phase 1'}</div>
                             <div id="bossChallenge" style="font-size: 18px; margin-bottom: 20px;">
                                 ${window.gameState.currentLanguage === 'zh' ? '在30秒內找到5個/t/音單詞！' : 'Find 5 /t/ sound words in 30 seconds!'}
@@ -1576,6 +1766,7 @@
             completeGame(gameId) {
                 console.log(`✅ 遊戲完成: ${gameId}`);
                 window.gameState.gameProgress[gameId].completed = true;
+                window.audioManager.playCorrect();
                 
                 // 給予神器
                 if (gameId === 'wordSearch') {
@@ -1672,6 +1863,15 @@
                 message.textContent = text;
                 document.body.appendChild(message);
                 
+                // 播放對應音效
+                if (type === 'success') {
+                    window.audioManager.playCorrect();
+                } else if (type === 'error') {
+                    window.audioManager.playWrong();
+                } else {
+                    window.audioManager.playClick();
+                }
+                
                 setTimeout(() => {
                     if (message.parentNode) {
                         message.style.opacity = '0';
@@ -1739,7 +1939,7 @@
             }
             
             placeWord(word) {
-                // 僅使用水平和垂直方向 - 修復版本
+                // 僅使用水平和垂直方向
                 const directions = [
                     [0, 1],   // 水平向右
                     [1, 0],   // 垂直向下
@@ -1808,6 +2008,7 @@
                 this.startCell = { row, col };
                 this.clearSelection();
                 this.selectCell(row, col);
+                window.audioManager.playClick();
             }
             
             continueSelection(row, col, e) {
@@ -1879,6 +2080,7 @@
                             id: `/ɪd/ ${t.sound}` 
                         };
                         document.getElementById('selectedSound').textContent = soundNames[this.selectedSound];
+                        window.audioManager.playClick();
                     };
                 });
                 
@@ -1983,7 +2185,7 @@
             }
         }
         
-        // 落字遊戲邏輯（戰士版本）
+        // 落字遊戲邏輯（改進的WASD + JKL版本）
         class FallingWordsGameLogic {
             constructor() {
                 this.isPlaying = false;
@@ -1991,12 +2193,13 @@
                 this.score = 0;
                 this.lives = 3;
                 this.timeLeft = 90;
-                this.targetSound = 't';
+                this.currentSword = 't';
                 this.fallingWords = [];
                 this.gameTimer = null;
                 this.spawnTimer = null;
                 this.gameArea = null;
-                this.warrior = null;
+                this.player = null;
+                this.playerX = 270; // 玩家X位置
                 
                 this.wordDatabase = {
                     t: ['watched', 'kicked', 'helped', 'worked', 'washed', 'passed', 'crossed', 'danced'],
@@ -2007,35 +2210,44 @@
             
             init() {
                 this.gameArea = document.getElementById('gameArea');
-                this.warrior = document.getElementById('warrior');
+                this.player = document.getElementById('player');
                 
                 document.getElementById('startFallingBtn').onclick = () => this.startGame();
                 document.getElementById('pauseFallingBtn').onclick = () => this.togglePause();
                 
-                document.querySelectorAll('.falling-sound-btn').forEach(btn => {
-                    btn.onclick = () => {
-                        document.querySelectorAll('.falling-sound-btn').forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        this.targetSound = btn.dataset.sound;
-                        const targetText = window.gameState.currentLanguage === 'zh' ? 
-                            `目標: /${btn.dataset.sound}/ 音` : 
-                            `Target: /${btn.dataset.sound}/ sound`;
-                        document.getElementById('currentTarget').textContent = targetText;
-                    };
+                // 劍選擇按鈕
+                document.querySelectorAll('.sword-btn').forEach(btn => {
+                    btn.onclick = () => this.selectSword(btn.dataset.sword);
                 });
                 
-                // 戰士移動控制
+                // 鍵盤控制
                 document.addEventListener('keydown', (e) => {
                     if (!this.isPlaying || this.isPaused) return;
                     
-                    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
-                        this.moveWarrior(-30);
-                    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
-                        this.moveWarrior(30);
-                    } else if (e.key === ' ') {
-                        e.preventDefault();
-                        this.slashSword();
+                    const key = e.key.toLowerCase();
+                    
+                    // WASD移動
+                    if (key === 'w') {
+                        // W鍵向上攻擊（攻擊上方的單詞）
+                        this.attackDirection('up');
+                    } else if (key === 'a') {
+                        this.movePlayer(-40);
+                    } else if (key === 's') {
+                        // S鍵向下攻擊（攻擊下方的單詞）
+                        this.attackDirection('down');
+                    } else if (key === 'd') {
+                        this.movePlayer(40);
                     }
+                    // JKL劍選擇
+                    else if (key === 'j') {
+                        this.selectSword('t');
+                    } else if (key === 'k') {
+                        this.selectSword('d');
+                    } else if (key === 'l') {
+                        this.selectSword('id');
+                    }
+                    
+                    e.preventDefault();
                 });
                 
                 // 點擊控制
@@ -2045,16 +2257,37 @@
                     const rect = this.gameArea.getBoundingClientRect();
                     const clickX = e.clientX - rect.left;
                     
-                    // 移動戰士到點擊位置
-                    const newPosition = Math.max(30, Math.min(570, clickX));
-                    this.warrior.style.left = newPosition + 'px';
+                    // 移動玩家到點擊位置
+                    this.playerX = Math.max(40, Math.min(560, clickX));
+                    this.player.style.left = this.playerX + 'px';
                     
-                    // 自動斬擊
-                    this.slashSword();
+                    // 自動攻擊
+                    this.attackNearbyWords();
                 };
                 
-                // 初始化目標
-                document.querySelector('.falling-sound-btn').click();
+                // 初始化劍選擇
+                this.selectSword('t');
+            }
+            
+            selectSword(swordType) {
+                this.currentSword = swordType;
+                
+                // 更新按鈕樣式
+                document.querySelectorAll('.sword-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`.sword-btn.${swordType}-sword`).classList.add('active');
+                
+                // 更新劍指示器
+                const indicator = document.getElementById('swordIndicator');
+                indicator.className = `sword-indicator sword-${swordType}`;
+                
+                window.audioManager.playClick();
+            }
+            
+            movePlayer(direction) {
+                this.playerX = Math.max(40, Math.min(560, this.playerX + direction));
+                this.player.style.left = this.playerX + 'px';
             }
             
             startGame() {
@@ -2064,12 +2297,14 @@
                 this.lives = 3;
                 this.timeLeft = 90;
                 this.fallingWords = [];
+                this.playerX = 270;
+                this.player.style.left = this.playerX + 'px';
                 
                 document.getElementById('startFallingBtn').disabled = true;
                 document.getElementById('pauseFallingBtn').disabled = false;
                 
                 this.gameTimer = setInterval(() => this.updateGame(), 1000/60);
-                this.spawnTimer = setInterval(() => this.spawnWord(), 1500);
+                this.spawnTimer = setInterval(() => this.spawnWord(), 1200); // 更快的生成速度
                 
                 console.log('⚔️ 岩石法師戰開始');
             }
@@ -2137,7 +2372,7 @@
                     element: wordElement,
                     text: randomWord,
                     type: randomType,
-                    speed: 2 + Math.random() * 3
+                    speed: 1.5 + Math.random() * 2
                 };
                 
                 wordElement.onclick = () => this.hitWord(wordData);
@@ -2146,32 +2381,45 @@
                 this.fallingWords.push(wordData);
             }
             
-            moveWarrior(direction) {
-                const currentLeft = parseInt(this.warrior.style.left) || 270;
-                const newLeft = Math.max(30, Math.min(570, currentLeft + direction));
-                this.warrior.style.left = newLeft + 'px';
-            }
-            
-            slashSword() {
-                const sword = document.getElementById('sword');
-                sword.classList.add('slash');
-                
-                // 檢查劍擊範圍內的單詞
-                const warriorRect = this.warrior.getBoundingClientRect();
+            attackDirection(direction) {
+                const playerRect = this.player.getBoundingClientRect();
                 const gameAreaRect = this.gameArea.getBoundingClientRect();
                 
                 this.fallingWords.forEach((word, index) => {
                     const wordRect = word.element.getBoundingClientRect();
                     
-                    if (Math.abs(wordRect.left - warriorRect.left) < 100 && 
-                        Math.abs(wordRect.top - warriorRect.top) < 100) {
+                    // 計算相對位置
+                    const wordX = wordRect.left - gameAreaRect.left;
+                    const wordY = wordRect.top - gameAreaRect.top;
+                    const playerGameX = playerRect.left - gameAreaRect.left;
+                    const playerGameY = playerRect.top - gameAreaRect.top;
+                    
+                    let shouldAttack = false;
+                    
+                    if (direction === 'up' && wordY < playerGameY && Math.abs(wordX - playerGameX) < 60) {
+                        shouldAttack = true;
+                    } else if (direction === 'down' && wordY > playerGameY && Math.abs(wordX - playerGameX) < 60) {
+                        shouldAttack = true;
+                    }
+                    
+                    if (shouldAttack) {
                         this.hitWord(word, index);
                     }
                 });
+            }
+            
+            attackNearbyWords() {
+                const playerRect = this.player.getBoundingClientRect();
+                const gameAreaRect = this.gameArea.getBoundingClientRect();
                 
-                setTimeout(() => {
-                    sword.classList.remove('slash');
-                }, 500);
+                this.fallingWords.forEach((word, index) => {
+                    const wordRect = word.element.getBoundingClientRect();
+                    
+                    if (Math.abs(wordRect.left - playerRect.left) < 80 && 
+                        Math.abs(wordRect.top - playerRect.top) < 80) {
+                        this.hitWord(word, index);
+                    }
+                });
             }
             
             hitWord(wordData, index = -1) {
@@ -2179,7 +2427,7 @@
                     index = this.fallingWords.indexOf(wordData);
                 }
                 
-                if (wordData.type === this.targetSound) {
+                if (wordData.type === this.currentSword) {
                     this.score += 20;
                     const message = window.gameState.currentLanguage === 'zh' ? '正確！ +20!' : 'Correct! +20!';
                     window.gameSystem.showMessage(message, 'success', 1000);
@@ -2198,12 +2446,15 @@
                 explosion.style.fontSize = '30px';
                 explosion.style.zIndex = '1000';
                 explosion.style.animation = 'fadeOut 1s ease-out forwards';
+                explosion.style.pointerEvents = 'none';
                 
                 this.gameArea.appendChild(explosion);
                 setTimeout(() => explosion.remove(), 1000);
                 
                 wordData.element.remove();
-                this.fallingWords.splice(index, 1);
+                if (index >= 0) {
+                    this.fallingWords.splice(index, 1);
+                }
             }
             
             togglePause() {
@@ -2242,15 +2493,12 @@
             }
         }
         
-        // 選擇題遊戲邏輯（夢魘版本）
+        // 選擇題遊戲邏輯（修正版：5連對即勝利）
         class MultipleChoiceGameLogic {
             constructor() {
                 this.currentQuestion = 0;
-                this.totalQuestions = 15;
-                this.score = 0;
                 this.consecutiveCorrect = 0;
                 this.questions = [];
-                this.isHypnotized = true;
                 
                 this.wordDatabase = {
                     t: ['watched', 'kicked', 'helped', 'worked', 'washed', 'passed', 'crossed', 'danced', 'jumped', 'walked'],
@@ -2273,7 +2521,8 @@
                     });
                 });
                 
-                for (let i = 0; i < this.totalQuestions; i++) {
+                // 生成足够的問題
+                for (let i = 0; i < 20; i++) {
                     const randomIndex = Math.floor(Math.random() * allWords.length);
                     this.questions.push(allWords[randomIndex]);
                     allWords.splice(randomIndex, 1);
@@ -2289,9 +2538,15 @@
             }
             
             showQuestion() {
-                if (this.currentQuestion >= this.totalQuestions) {
-                    this.endGame();
+                if (this.consecutiveCorrect >= 5) {
+                    this.winGame();
                     return;
+                }
+                
+                if (this.currentQuestion >= this.questions.length) {
+                    // 如果問題用完但還沒達到5連對，重新生成
+                    this.generateQuestions();
+                    this.currentQuestion = 0;
                 }
                 
                 const question = this.questions[this.currentQuestion];
@@ -2299,7 +2554,6 @@
                 document.getElementById('mcWord').textContent = question.word.toUpperCase();
                 document.getElementById('mcCurrent').textContent = this.currentQuestion + 1;
                 document.getElementById('mcStreak').textContent = this.consecutiveCorrect;
-                document.getElementById('mcScoreValue').textContent = this.score;
                 
                 // 重置選項樣式
                 document.querySelectorAll('.mc-option').forEach(btn => {
@@ -2307,9 +2561,15 @@
                     btn.disabled = false;
                 });
                 
-                // 添加催眠效果
-                if (this.isHypnotized) {
+                // 添加催眠效果（直到連對5次）
+                if (this.consecutiveCorrect < 5) {
                     document.querySelector('.game-container').style.filter = 'sepia(100%) hue-rotate(280deg)';
+                    
+                    // 更新角色外觀
+                    const playerSprites = document.querySelectorAll('.player-character');
+                    playerSprites.forEach(sprite => {
+                        sprite.classList.add('hypnotized');
+                    });
                 }
             }
             
@@ -2335,67 +2595,48 @@
                 });
                 
                 if (isCorrect) {
-                    this.score++;
                     this.consecutiveCorrect++;
                     const message = window.gameState.currentLanguage === 'zh' ? '正確！' : 'Correct!';
                     window.gameSystem.showMessage(message, 'success', 1500);
                     
-                    // 檢查是否清醒
-                    if (this.consecutiveCorrect >= 5 && this.isHypnotized) {
-                        this.wakeUp();
+                    // 檢查是否勝利
+                    if (this.consecutiveCorrect >= 5) {
+                        setTimeout(() => this.winGame(), 1500);
+                        return;
                     }
                 } else {
-                    this.consecutiveCorrect = 0;
+                    this.consecutiveCorrect = 0; // 重置連對計數
                     const correctAnswer = window.gameState.currentLanguage === 'zh' ? 
                         `錯誤！正確答案是 /${question.type}/ 音` : 
                         `Wrong! Correct answer is /${question.type}/ sound`;
                     window.gameSystem.showMessage(correctAnswer, 'error', 2000);
-                    
-                    // 重新進入催眠
-                    if (!this.isHypnotized) {
-                        this.isHypnotized = true;
-                        document.querySelector('.game-container').style.filter = 'sepia(100%) hue-rotate(280deg)';
-                        const hypnotizedMessage = window.gameState.currentLanguage === 'zh' ? 
-                            '你又被催眠了！' : 'You are hypnotized again!';
-                        window.gameSystem.showMessage(hypnotizedMessage, 'warning');
-                    }
                 }
                 
                 this.currentQuestion++;
                 setTimeout(() => this.showQuestion(), 2500);
             }
             
-            wakeUp() {
-                this.isHypnotized = false;
-                document.querySelector('.game-container').style.filter = 'none';
-                const wakeMessage = window.gameState.currentLanguage === 'zh' ? 
-                    '🌟 你醒了！繼續戰鬥！' : '🌟 You are awake! Keep fighting!';
-                window.gameSystem.showMessage(wakeMessage, 'success', 3000);
-            }
-            
-            endGame() {
+            winGame() {
+                // 解除催眠效果
                 document.querySelector('.game-container').style.filter = 'none';
                 
-                if (!this.isHypnotized && this.score >= 10) {
-                    const victoryMessage = window.gameState.currentLanguage === 'zh' ? 
-                        '🎉 擊敗夢魘法師！最後的神器獲得！' : 
-                        '🎉 Nightmare wizard defeated! Final artifact obtained!';
-                    window.gameSystem.showMessage(victoryMessage, 'success', 4000);
-                    window.gameState.artifacts.id = true;
-                    window.gameSystem.completeGame('multipleChoice');
-                } else {
-                    const failMessage = window.gameState.currentLanguage === 'zh' ? 
-                        '你還沒有完全清醒...再試一次！' : 
-                        'You are not fully awake... try again!';
-                    window.gameSystem.showMessage(failMessage, 'warning', 4000);
-                    setTimeout(() => {
-                        window.gameSystem.showGameMenu();
-                    }, 4000);
-                }
+                // 恢復角色外觀
+                const playerSprites = document.querySelectorAll('.player-character');
+                playerSprites.forEach(sprite => {
+                    sprite.classList.remove('hypnotized');
+                });
+                
+                const victoryMessage = window.gameState.currentLanguage === 'zh' ? 
+                    '🎉 連續答對5題！擊敗夢魘法師！最後的神器獲得！' : 
+                    '🎉 5 consecutive correct! Nightmare wizard defeated! Final artifact obtained!';
+                window.gameSystem.showMessage(victoryMessage, 'success', 4000);
+                
+                window.gameState.artifacts.id = true;
+                window.gameSystem.completeGame('multipleChoice');
             }
         }
         
-        // Boss戰遊戲邏輯
+        // Boss戰遊戲邏輯（修正版：確保足夠的正確答案）
         class BossFightGameLogic {
             constructor() {
                 this.bossHealth = 100;
@@ -2410,6 +2651,13 @@
                 this.progress = 0;
                 this.timeLeft = 0;
                 this.gameTimer = null;
+                
+                // 確保每種類型有足夠的單詞
+                this.wordDatabase = {
+                    t: ['watched', 'kicked', 'helped', 'worked', 'washed', 'passed', 'crossed', 'danced', 'jumped', 'walked', 'talked', 'asked', 'looked', 'cooked', 'booked'],
+                    d: ['played', 'lived', 'moved', 'loved', 'opened', 'closed', 'turned', 'learned', 'called', 'saved', 'tried', 'died', 'cried', 'fried', 'dried'],
+                    id: ['wanted', 'needed', 'decided', 'started', 'ended', 'visited', 'created', 'painted', 'invited', 'selected', 'collected', 'connected', 'protected', 'directed', 'elected']
+                };
             }
             
             init() {
@@ -2471,7 +2719,6 @@
                     }
                 }, 1000);
                 
-                // 生成挑戰元素（簡化版）
                 this.generateChallengeElements(challenge);
             }
             
@@ -2480,57 +2727,107 @@
                 gameArea.style.display = 'block';
                 gameArea.innerHTML = '';
                 
-                // 創建快速點擊挑戰
-                for (let i = 0; i < 10; i++) {
-                    const word = this.getRandomWord();
+                // 確保生成足夠的目標類型單詞
+                const targetWords = this.wordDatabase[challenge.type].slice(0, challenge.count);
+                const otherWords = [];
+                
+                // 添加其他類型的單詞作為干擾
+                Object.keys(this.wordDatabase).forEach(type => {
+                    if (type !== challenge.type) {
+                        otherWords.push(...this.wordDatabase[type].slice(0, 3));
+                    }
+                });
+                
+                // 混合所有單詞
+                const allWords = [
+                    ...targetWords.map(word => ({ word, type: challenge.type })),
+                    ...otherWords.map(word => ({ word, type: this.getWordType(word) }))
+                ];
+                
+                // 隨機排列
+                for (let i = allWords.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [allWords[i], allWords[j]] = [allWords[j], allWords[i]];
+                }
+                
+                // 創建單詞元素
+                allWords.forEach((wordData, index) => {
                     const wordEl = document.createElement('div');
-                    wordEl.textContent = word.word;
-                    wordEl.className = `boss-word ${word.type}`;
+                    wordEl.textContent = wordData.word;
+                    wordEl.className = `boss-word ${wordData.type}-word`;
                     wordEl.style.cssText = `
                         position: absolute;
-                        left: ${Math.random() * 400}px;
-                        top: ${Math.random() * 60}px;
+                        left: ${(index % 5) * 95 + 10}px;
+                        top: ${Math.floor(index / 5) * 35 + 10}px;
                         padding: 8px 12px;
                         border-radius: 6px;
                         color: white;
                         font-weight: bold;
                         cursor: pointer;
                         transition: all 0.2s;
-                        background: ${word.type === 't' ? '#3498db' : word.type === 'd' ? '#e74c3c' : '#2ecc71'};
+                        font-size: 14px;
+                        background: ${this.getWordColor(wordData.type)};
+                        border: 2px solid transparent;
                     `;
                     
-                    wordEl.onclick = () => this.clickWord(word, wordEl);
+                    wordEl.onmouseover = () => {
+                        wordEl.style.transform = 'scale(1.1)';
+                        wordEl.style.borderColor = 'white';
+                    };
+                    
+                    wordEl.onmouseout = () => {
+                        wordEl.style.transform = 'scale(1)';
+                        wordEl.style.borderColor = 'transparent';
+                    };
+                    
+                    wordEl.onclick = () => this.clickWord(wordData, wordEl);
                     gameArea.appendChild(wordEl);
+                });
+                
+                console.log(`生成Boss挑戰: ${challenge.type}音, 目標${challenge.count}個, 實際生成${targetWords.length}個`);
+            }
+            
+            getWordType(word) {
+                // 根據單詞判斷類型
+                if (this.wordDatabase.t.includes(word)) return 't';
+                if (this.wordDatabase.d.includes(word)) return 'd';
+                if (this.wordDatabase.id.includes(word)) return 'id';
+                return 't'; // 默認
+            }
+            
+            getWordColor(type) {
+                switch(type) {
+                    case 't': return '#3498db';
+                    case 'd': return '#e74c3c';
+                    case 'id': return '#2ecc71';
+                    default: return '#95a5a6';
                 }
             }
             
-            getRandomWord() {
-                const types = ['t', 'd', 'id'];
-                const type = types[Math.floor(Math.random() * types.length)];
-                const words = {
-                    t: ['watched', 'kicked', 'helped'],
-                    d: ['played', 'lived', 'moved'],
-                    id: ['wanted', 'needed', 'decided']
-                };
-                return { word: words[type][Math.floor(Math.random() * words[type].length)], type };
-            }
-            
-            clickWord(word, element) {
+            clickWord(wordData, element) {
                 const challenge = this.challenges[this.currentChallenge];
                 
-                if (word.type === challenge.type) {
+                if (wordData.type === challenge.type) {
                     this.progress++;
                     element.style.background = '#2ecc71';
                     element.style.transform = 'scale(0)';
-                    setTimeout(() => element.remove(), 300);
+                    element.style.pointerEvents = 'none';
+                    
+                    setTimeout(() => {
+                        if (element.parentNode) element.remove();
+                    }, 300);
                     
                     if (this.progress >= challenge.count) {
                         this.completePhase();
                     }
                 } else {
+                    // 錯誤回饋
                     element.style.background = '#e74c3c';
+                    element.style.animation = 'shake 0.5s ease-in-out';
+                    
                     setTimeout(() => {
-                        element.style.background = word.type === 't' ? '#3498db' : word.type === 'd' ? '#e74c3c' : '#2ecc71';
+                        element.style.background = this.getWordColor(wordData.type);
+                        element.style.animation = 'none';
                     }, 500);
                 }
                 
@@ -2620,6 +2917,12 @@
             @keyframes bossDefeat {
                 0% { transform: translateX(-50%) rotate(0deg); }
                 100% { transform: translateX(-50%) rotate(360deg) scale(0.5); opacity: 0; }
+            }
+            
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                75% { transform: translateX(5px); }
             }
         `;
         
