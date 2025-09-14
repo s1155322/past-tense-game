@@ -8,11 +8,117 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/games.css">
+    
+    <!-- Inline critical CSS for loading and error states -->
+    <style>
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 10000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid #4ecca3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 10001;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .error-details {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-width: 600px;
+        }
+        
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <h2>英語過去式發音冒險</h2>
+        <p>Loading Adventure...</p>
+        <div id="loadingStatus">初始化系統中...</div>
+    </div>
+    
+    <!-- Error Screen -->
+    <div id="errorScreen" class="error-screen">
+        <h1>🚨 載入錯誤</h1>
+        <div class="error-details">
+            <h3>遊戲載入失敗</h3>
+            <div id="errorMessage">Unknown error occurred</div>
+            <div id="errorDetails" style="margin-top: 15px; font-size: 14px; color: #ffcccc;"></div>
+        </div>
+        <button onclick="location.reload()" style="
+            background: #3498db; color: white; border: none; padding: 15px 30px; 
+            border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px;">
+            🔄 重新載入
+        </button>
+        <button onclick="toggleDebugInfo()" style="
+            background: #f39c12; color: white; border: none; padding: 15px 30px; 
+            border-radius: 8px; font-size: 16px; cursor: pointer; margin: 10px;">
+            🔧 顯示偵錯資訊
+        </button>
+    </div>
+    
+    <!-- Debug Info Panel -->
+    <div id="debugInfo" class="debug-info"></div>
+    
     <!-- Settings Panel -->
-    <div id="settingsPanel" class="settings-panel">
+    <div id="settingsPanel" class="settings-panel" style="display: none;">
         <div class="settings-content">
             <h2>⚙️</h2>
             <h3 id="settingsTitle">遊戲設置</h3>
@@ -53,29 +159,29 @@
         </div>
     </div>
 
-    <!-- Story Container -->
+    <!-- Story Container (Intro Video) -->
     <div id="storyContainer" class="story-container" style="display: none;">
         <div class="video-wrapper">
-            <video id="introVideo" controls>
+            <video id="introVideo" width="100%" height="auto" preload="metadata">
                 <source src="assets/video/intro.mp4" type="video/mp4">
-                您的瀏覽器不支援 video 標籤。
+                <p>您的瀏覽器不支援 video 標籤。</p>
             </video>
             <div class="story-controls">
-                <button id="skipIntro">Skip</button>
-                <button id="continueStory">Continue</button>
+                <button id="skipIntro" class="video-control-btn">Skip</button>
+                <button id="continueStory" class="video-control-btn">Continue</button>
             </div>
         </div>
     </div>
 
     <!-- Main Game Container -->
-    <div id="gameContainer" class="container">
+    <div id="gameContainer" class="container" style="display: none;">
         
         <!-- Main Menu -->
-        <div id="mainMenu" class="main-menu">
+        <div id="mainMenu" class="main-menu" style="display: none;">
             <h1 id="gameTitle">英語過去式發音冒險</h1>
             <div class="menu-options">
                 <button id="startGame" class="menu-btn">開始冒險</button>
-                <button id="continueGame" class="menu-btn">繼續冒險</button>
+                <button id="continueGame" class="menu-btn" style="display: none;">繼續冒險</button>
                 <button id="collectionsBtn" class="menu-btn">收藏品</button>
                 <button id="quitGame" class="menu-btn">離開遊戲</button>
             </div>
@@ -102,7 +208,7 @@
                     <p>完成知識試煉後獲得</p>
                 </div>
             </div>
-            <button class="back-btn" onclick="window.gameSystem?.showMainMenu()">返回大廳</button>
+            <button class="back-btn" id="collectionsBackBtn">返回大廳</button>
         </div>
 
         <!-- Game Menu -->
@@ -138,7 +244,7 @@
                 <div class="stat">當前階段: <span id="currentStage">1</span></div>
             </div>
 
-            <button class="back-btn" onclick="window.gameSystem?.showMainMenu()">返回大廳</button>
+            <button class="back-btn" id="gameMenuBackBtn">返回大廳</button>
         </div>
 
         <!-- Game 1: Word Search -->
@@ -193,7 +299,7 @@
                 <button id="pronounceWord" class="control-btn">發音</button>
             </div>
 
-            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+            <button class="back-btn" id="wordSearchBackBtn">返回選單</button>
         </div>
 
         <!-- Game 2: Falling Words -->
@@ -230,7 +336,7 @@
                 <div>生命: <span id="fallingLives">3</span></div>
             </div>
 
-            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+            <button class="back-btn" id="fallingWordsBackBtn">返回選單</button>
         </div>
 
         <!-- Game 3: Multiple Choice -->
@@ -271,7 +377,7 @@
                 <div>分數: <span id="multipleChoiceScore">0</span></div>
             </div>
 
-            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+            <button class="back-btn" id="multipleChoiceBackBtn">返回選單</button>
         </div>
 
         <!-- Game 4: Boss Fight -->
@@ -315,19 +421,19 @@
                 <button class="choice-button" data-sound="id">/id/</button>
             </div>
 
-            <button class="back-btn" onclick="window.gameSystem?.showGameMenu()">返回選單</button>
+            <button class="back-btn" id="bossFightBackBtn">返回選單</button>
         </div>
 
         <!-- Ending Container -->
         <div id="endingContainer" class="ending-container" style="display: none;">
             <div class="video-wrapper">
-                <video id="endingVideo">
+                <video id="endingVideo" width="100%" height="auto" preload="metadata">
                     <source src="assets/video/ending.mp4" type="video/mp4">
-                    您的瀏覽器不支援 video 標籤。
+                    <p>您的瀏覽器不支援 video 標籤。</p>
                 </video>
                 <div class="ending-controls">
-                    <button id="playAgain">再玩一次</button>
-                    <button id="backToMenu">返回主選單</button>
+                    <button id="playAgain" class="video-control-btn">再玩一次</button>
+                    <button id="backToMenu" class="video-control-btn">返回主選單</button>
                 </div>
             </div>
         </div>
@@ -348,17 +454,259 @@
         <source src="assets/audio/click.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- JavaScript Files - Correct Order and Paths -->
-    <script src="js/wordDatabase.js"></script>
-    <script src="js/soundSystem.js"></script>
-    <script src="js/gamesystem.js"></script>
-    <script src="js/wordSearch.js"></script>
-    <script src="js/fallingword.js"></script>
-    <script src="js/multipleChoice.js"></script>
-    <script src="js/BossFight.js"></script>
-    <script src="js/main.js"></script>
+    <!-- Enhanced Loading and Error Handling Script -->
+    <script>
+        console.log('🎮 Starting Enhanced Game System Load...');
+        
+        // Enhanced loading system
+        const LoadingManager = {
+            scriptsLoaded: 0,
+            totalScripts: 8,
+            errors: [],
+            startTime: Date.now(),
+            
+            updateStatus(message) {
+                const statusElement = document.getElementById('loadingStatus');
+                if (statusElement) {
+                    statusElement.textContent = message;
+                }
+                console.log('📊', message);
+            },
+            
+            updateProgress() {
+                this.scriptsLoaded++;
+                const progress = Math.round((this.scriptsLoaded / this.totalScripts) * 100);
+                this.updateStatus(`載入中... ${progress}% (${this.scriptsLoaded}/${this.totalScripts})`);
+            },
+            
+            scriptLoaded(scriptName) {
+                this.updateProgress();
+                console.log('✅ Script loaded:', scriptName);
+            },
+            
+            scriptError(scriptName, error) {
+                this.errors.push({ script: scriptName, error: error });
+                this.updateProgress();
+                console.error('❌ Script failed:', scriptName, error);
+            },
+            
+            allScriptsLoaded() {
+                const loadTime = Date.now() - this.startTime;
+                console.log(`🎉 All scripts loaded in ${loadTime}ms`);
+                
+                if (this.errors.length > 0) {
+                    this.showError('部分腳本載入失敗', this.errors);
+                    return;
+                }
+                
+                // Initialize game system
+                this.initializeGameSystem();
+            },
+            
+            initializeGameSystem() {
+                this.updateStatus('初始化遊戲系統...');
+                
+                setTimeout(() => {
+                    try {
+                        if (window.gameSystem && typeof window.gameSystem.showMainMenu === 'function') {
+                            this.hideLoadingScreen();
+                            console.log('🎮 Game System ready!');
+                        } else {
+                            throw new Error('GameSystem not properly initialized');
+                        }
+                    } catch (error) {
+                        this.showError('遊戲系統初始化失敗', error);
+                    }
+                }, 1000);
+            },
+            
+            hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                if (loadingScreen) {
+                    loadingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                        document.getElementById('gameContainer').style.display = 'block';
+                    }, 500);
+                }
+            },
+            
+            showError(title, details) {
+                const errorScreen = document.getElementById('errorScreen');
+                const errorMessage = document.getElementById('errorMessage');
+                const errorDetails = document.getElementById('errorDetails');
+                const loadingScreen = document.getElementById('loadingScreen');
+                
+                if (errorScreen && errorMessage) {
+                    errorMessage.textContent = title;
+                    
+                    if (errorDetails && details) {
+                        if (Array.isArray(details)) {
+                            errorDetails.innerHTML = details.map(err => 
+                                `<div>❌ ${err.script}: ${err.error}</div>`
+                            ).join('');
+                        } else {
+                            errorDetails.textContent = details.toString();
+                        }
+                    }
+                    
+                    if (loadingScreen) loadingScreen.style.display = 'none';
+                    errorScreen.style.display = 'flex';
+                }
+            }
+        };
+        
+        // Enhanced script loading with error handling
+        function loadScript(src, name) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = false; // Maintain order
+                
+                script.onload = () => {
+                    LoadingManager.scriptLoaded(name);
+                    resolve();
+                };
+                
+                script.onerror = (error) => {
+                    LoadingManager.scriptError(name, `Failed to load ${src}`);
+                    reject(error);
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Debug info functions
+        function toggleDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+            updateDebugInfo();
+        }
+        
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo.style.display === 'block') {
+                debugInfo.innerHTML = `
+                    <strong>Debug Information:</strong><br>
+                    GameSystem: ${window.gameSystem ? '✅ Loaded' : '❌ Missing'}<br>
+                    Scripts Loaded: ${LoadingManager.scriptsLoaded}/${LoadingManager.totalScripts}<br>
+                    Errors: ${LoadingManager.errors.length}<br>
+                    Load Time: ${Date.now() - LoadingManager.startTime}ms<br>
+                    User Agent: ${navigator.userAgent.substring(0, 50)}...
+                `;
+            }
+        }
+        
+        // Error handling
+        window.addEventListener('error', (e) => {
+            LoadingManager.scriptError('Runtime', e.message);
+            console.error('Runtime Error:', e);
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            LoadingManager.scriptError('Promise', e.reason);
+            console.error('Unhandled Promise Rejection:', e);
+        });
+        
+        // Start loading scripts in correct order
+        async function loadAllScripts() {
+            const scripts = [
+                { src: 'js/wordDatabase.js', name: 'WordDatabase' },
+                { src: 'js/soundSystem.js', name: 'SoundSystem' },
+                { src: 'js/gamesystem.js', name: 'GameSystem' },
+                { src: 'js/wordSearch.js', name: 'WordSearch' },
+                { src: 'js/fallingword.js', name: 'FallingWords' },
+                { src: 'js/multipleChoice.js', name: 'MultipleChoice' },
+                { src: 'js/BossFight.js', name: 'BossFight' },
+                { src: 'js/main.js', name: 'Main' }
+            ];
+            
+            try {
+                for (const script of scripts) {
+                    await loadScript(script.src, script.name);
+                }
+                LoadingManager.allScriptsLoaded();
+            } catch (error) {
+                LoadingManager.showError('腳本載入失敗', error);
+            }
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAllScripts);
+        } else {
+            loadAllScripts();
+        }
+        
+        // Set up fallback video event handlers directly in HTML
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup basic button event handlers as fallback
+            const setupFallbackHandlers = () => {
+                console.log('🔧 Setting up fallback button handlers');
+                
+                // Back button handlers with IDs
+                const backButtons = [
+                    { id: 'collectionsBackBtn', action: () => window.gameSystem?.showMainMenu() },
+                    { id: 'gameMenuBackBtn', action: () => window.gameSystem?.showMainMenu() },
+                    { id: 'wordSearchBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                    { id: 'fallingWordsBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                    { id: 'multipleChoiceBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                    { id: 'bossFightBackBtn', action: () => window.gameSystem?.showGameMenu() }
+                ];
+                
+                backButtons.forEach(btn => {
+                    const element = document.getElementById(btn.id);
+                    if (element) {
+                        element.onclick = btn.action;
+                    }
+                });
+                
+                // Video control handlers
+                const skipIntroBtn = document.getElementById('skipIntro');
+                const continueStoryBtn = document.getElementById('continueStory');
+                const playAgainBtn = document.getElementById('playAgain');
+                const backToMenuBtn = document.getElementById('backToMenu');
+                
+                if (skipIntroBtn) {
+                    skipIntroBtn.onclick = () => {
+                        document.getElementById('storyContainer').style.display = 'none';
+                        if (window.gameSystem) {
+                            window.gameSystem.showGameMenu();
+                        }
+                    };
+                }
+                
+                if (continueStoryBtn) {
+                    continueStoryBtn.onclick = () => {
+                        document.getElementById('storyContainer').style.display = 'none';
+                        if (window.gameSystem) {
+                            window.gameSystem.showGameMenu();
+                        }
+                    };
+                }
+                
+                if (playAgainBtn) {
+                    playAgainBtn.onclick = () => window.location.reload();
+                }
+                
+                if (backToMenuBtn) {
+                    backToMenuBtn.onclick = () => {
+                        document.getElementById('endingContainer').style.display = 'none';
+                        if (window.gameSystem) {
+                            window.gameSystem.showMainMenu();
+                        }
+                    };
+                }
+            };
+            
+            // Set up fallback handlers immediately
+            setupFallbackHandlers();
+            
+            // Set up again after scripts might be loaded
+            setTimeout(setupFallbackHandlers, 2000);
+        });
+    </script>
 
 </body>
 </html>
-
-
