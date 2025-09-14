@@ -386,7 +386,7 @@
             position: relative;
         }
         
-        /* 字母網格 */
+        /* 字母網格 - 修復版本 */
         #letterGrid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
@@ -416,6 +416,7 @@
             color: #333;
             border: 2px solid transparent;
             user-select: none;
+            position: relative;
         }
         
         .letter-cell:hover {
@@ -432,16 +433,26 @@
             transform: scale(1.05);
         }
         
-        .letter-cell.found {
-            background: #2ecc71 !important;
+        /* 修復：允許重複選擇，不再用found類別鎖定 */
+        .letter-cell.part-of-word {
+            background: rgba(46, 204, 113, 0.3) !important;
+            border: 2px solid #27ae60;
+        }
+        
+        .letter-cell.part-of-word.selected {
+            background: #4ecca3 !important;
             color: white;
-            border-color: #27ae60;
+            border-color: #2ecc71;
+        }
+        
+        /* 找到單詞時的動畫效果 */
+        .letter-cell.word-found {
             animation: cellFound 0.6s ease-in-out;
         }
         
         @keyframes cellFound {
             0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
+            50% { transform: scale(1.3); background: #2ecc71; }
             100% { transform: scale(1.05); }
         }
         
@@ -1883,7 +1894,7 @@
             }
         }
         
-        // 單詞搜索遊戲邏輯（簡化的水平和垂直版本）
+        // 單詞搜索遊戲邏輯（修復：允許重複選擇字母）
         class WordSearchGameLogic {
             constructor() {
                 this.selectedSound = null;
@@ -1902,6 +1913,7 @@
                 };
                 
                 this.targetWords = [];
+                this.foundWordPositions = []; // 記錄已找到單詞的位置
             }
             
             startGame() {
@@ -1939,11 +1951,11 @@
             }
             
             placeWord(word) {
-                // 僅使用水平和垂直方向
+                // 僅使用4個方向：左右上下
                 const directions = [
                     [0, 1],   // 水平向右
-                    [1, 0],   // 垂直向下
                     [0, -1],  // 水平向左
+                    [1, 0],   // 垂直向下
                     [-1, 0]   // 垂直向上
                 ];
                 
@@ -2029,7 +2041,7 @@
                 
                 // 僅允許水平或垂直選擇
                 if (Math.abs(dx) > 0 && Math.abs(dy) > 0) {
-                    // 斜線選擇，選擇主要方向
+                    // 如果是斜線，選擇主要方向
                     if (Math.abs(dx) > Math.abs(dy)) {
                         end.row = start.row; // 水平
                     } else {
@@ -2058,8 +2070,9 @@
             }
             
             selectCell(row, col) {
+                // 修復：允許選擇任何字母，無論是否已經是某個單詞的一部分
                 const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-                if (cell && !cell.classList.contains('found')) {
+                if (cell) {
                     cell.classList.add('selected');
                     this.selectedCells.push({ row, col });
                 }
@@ -2121,10 +2134,19 @@
                     this.foundWords[wordObj.type].push(word);
                     this.progress[wordObj.type]++;
                     
+                    // 記錄找到的單詞位置
+                    this.foundWordPositions.push({
+                        word: word,
+                        cells: [...this.selectedCells]
+                    });
+                    
+                    // 添加單詞找到的動畫效果
                     this.selectedCells.forEach(cell => {
                         const cellEl = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
-                        cellEl.classList.add('found');
+                        cellEl.classList.add('word-found');
                         cellEl.classList.remove('selected');
+                        // 給已找到的單詞加上特殊樣式，但仍然可以選擇
+                        cellEl.classList.add('part-of-word');
                     });
                     
                     const listEl = document.getElementById(`foundWords${wordObj.type.toUpperCase()}`);
