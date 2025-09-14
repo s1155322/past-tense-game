@@ -1,6 +1,6 @@
 /**
  * Word Search Game - COMPLETELY FIXED VERSION
- * No more stuck background images, proper game interface generation
+ * Ensures letter grid actually shows up and works properly
  */
 class WordSearchGame {
     constructor(gameSystem) {
@@ -11,7 +11,7 @@ class WordSearchGame {
         this.selectedWords = [];
         this.targetWords = [];
         
-        // Word database
+        // Word database with pronunciation types
         this.wordDatabase = {
             t: ['watched', 'crossed', 'kicked', 'danced', 'jumped', 'helped', 'worked', 'washed'],
             d: ['played', 'lived', 'moved', 'called', 'loved', 'saved', 'opened', 'closed'],
@@ -22,13 +22,22 @@ class WordSearchGame {
         this.boardSize = 12;
         this.foundWords = [];
         this.currentSelection = [];
+        this.placedWords = [];
         
         this.init();
     }
     
     init() {
-        console.log('Initializing Word Search Stone Bridge Game');
+        console.log('🎮 Initializing Word Search Stone Bridge Game');
         this.setupEventListeners();
+        
+        // Auto-start if the game container is visible
+        setTimeout(() => {
+            const gameContainer = document.getElementById('wordSearch');
+            if (gameContainer && gameContainer.style.display !== 'none') {
+                this.startGame();
+            }
+        }, 500);
     }
     
     setupEventListeners() {
@@ -37,10 +46,26 @@ class WordSearchGame {
                 this.startGame();
             }
         });
+        
+        // Check if container becomes visible
+        const observer = new MutationObserver(() => {
+            const gameContainer = document.getElementById('wordSearch');
+            if (gameContainer && gameContainer.style.display !== 'none' && !this.isGameActive) {
+                console.log('🎯 Word search container is visible, starting game...');
+                this.startGame();
+            }
+        });
+        
+        if (document.getElementById('wordSearch')) {
+            observer.observe(document.getElementById('wordSearch'), { 
+                attributes: true, 
+                attributeFilter: ['style'] 
+            });
+        }
     }
     
     startGame() {
-        this.log('Starting Word Search game');
+        console.log('🚀 Starting Word Search game');
         this.showCutscene();
     }
     
@@ -50,7 +75,12 @@ class WordSearchGame {
     
     showCutscene() {
         const gameContainer = document.getElementById('wordSearch');
-        if (!gameContainer) return;
+        if (!gameContainer) {
+            console.error('Game container not found!');
+            return;
+        }
+        
+        this.log('Showing cutscene');
         
         // Create complete cutscene interface
         gameContainer.innerHTML = `
@@ -113,7 +143,7 @@ class WordSearchGame {
                         <div style="background: rgba(76, 204, 163, 0.2); padding: 15px; border-radius: 10px; margin: 20px 0;">
                             <strong style="color: #4ecca3;">遊戲規則：</strong>
                             <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
-                                <li>在12x12網格中找到過去式單詞</li>
+                                <li>在12×12網格中找到過去式單詞</li>
                                 <li>選擇單詞的正確發音類型：/t/, /d/, 或 /ɪd/</li>
                                 <li>正確分類的單詞會成為橋樑石塊</li>
                                 <li>找到足夠的單詞完成石橋修復</li>
@@ -121,7 +151,7 @@ class WordSearchGame {
                         </div>
                     </div>
                     
-                    <button onclick="window.wordSearchGame.startMainGame()" style="
+                    <button id="startMainGameBtn" style="
                         background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
                         padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                         cursor: pointer; margin: 25px 10px; box-shadow: 0 8px 25px rgba(76, 204, 163, 0.4);
@@ -129,7 +159,7 @@ class WordSearchGame {
                         🌉 開始修復石橋
                     </button>
                     
-                    <button onclick="window.gameSystem?.showGameMenu()" style="
+                    <button id="backToMenuBtn" style="
                         background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
                         padding: 20px 40px; border-radius: 15px; font-size: 20px; font-weight: bold; 
                         cursor: pointer; margin: 25px 10px;">
@@ -145,21 +175,35 @@ class WordSearchGame {
             }
             </style>
         `;
+        
+        // Add event listeners
+        document.getElementById('startMainGameBtn').onclick = () => this.startMainGame();
+        document.getElementById('backToMenuBtn').onclick = () => {
+            if (this.gameSystem) {
+                this.gameSystem.showGameMenu();
+            }
+        };
     }
     
     startMainGame() {
-        this.log('Starting main word search game');
+        this.log('🎯 Starting main word search game with letter grid generation');
         this.setupGameInterface();
         this.resetGame();
         this.generateGameBoard();
+        this.setupGameControls();
         this.updateDisplay();
     }
     
     setupGameInterface() {
         const gameContainer = document.getElementById('wordSearch');
-        if (!gameContainer) return;
+        if (!gameContainer) {
+            console.error('Game container not found for interface setup!');
+            return;
+        }
         
-        // Create complete game interface (NO background images that can get stuck)
+        this.log('Setting up complete game interface');
+        
+        // Create complete game interface with NO background images that can get stuck
         gameContainer.innerHTML = `
             <div class="word-search-game" style="
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -168,9 +212,9 @@ class WordSearchGame {
                 <!-- Game Header -->
                 <div class="game-header" style="text-align: center; margin-bottom: 30px;">
                     <h2 style="font-size: 28px; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.7);">
-                        🔍 單詞搜索 - 石橋修復
+                        🔍 單詞搜索遊戲
                     </h2>
-                    <p style="font-size: 16px; margin: 10px 0;">在網格中找到過去式單詞並選擇正確的發音類型</p>
+                    <p style="font-size: 16px; margin: 10px 0;">在網格中找到過去式單詞，選擇正確的發音類型</p>
                 </div>
                 
                 <!-- Game Stats -->
@@ -189,40 +233,39 @@ class WordSearchGame {
                     text-align: center; margin-bottom: 25px; 
                     background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px;">
                     
-                    <h3 style="margin-top: 0; color: #fbbf24;">選擇發音類型：</h3>
                     <div class="sound-buttons" style="display: flex; justify-content: center; gap: 15px; margin: 15px 0;">
                         <button class="sound-btn" data-sound="t" style="
                             background: linear-gradient(45deg, #3498db, #2980b9); color: white; border: none; 
                             padding: 15px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; 
                             cursor: pointer; transition: all 0.3s ease;">
-                            🔵 /t/ 音<br><small>watched, kicked</small>
+                            /t/
                         </button>
                         <button class="sound-btn" data-sound="d" style="
                             background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border: none; 
                             padding: 15px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; 
                             cursor: pointer; transition: all 0.3s ease;">
-                            🔴 /d/ 音<br><small>played, lived</small>
+                            /d/
                         </button>
                         <button class="sound-btn" data-sound="id" style="
                             background: linear-gradient(45deg, #2ecc71, #27ae60); color: white; border: none; 
                             padding: 15px 25px; border-radius: 10px; font-size: 16px; font-weight: bold; 
                             cursor: pointer; transition: all 0.3s ease;">
-                            🟢 /ɪd/ 音<br><small>wanted, needed</small>
+                            /ɪd/
                         </button>
                     </div>
-                    <div style="margin: 15px 0;">
-                        選擇的發音類型: <span id="selectedSoundDisplay" style="color: #4ecca3; font-weight: bold;">請選擇</span>
+                    <div style="margin: 15px 0; font-size: 16px;">
+                        選擇的發音類型: <span id="selectedSoundDisplay" style="color: #4ecca3; font-weight: bold;">none</span>
                     </div>
                 </div>
                 
-                <!-- Game Board -->
+                <!-- MAIN GAME BOARD - This is where letters will appear -->
                 <div class="game-board-container" style="
                     display: flex; justify-content: center; margin-bottom: 25px;">
                     <div id="wordSearchBoard" class="word-search-board" style="
-                        display: grid; grid-template-columns: repeat(12, 1fr); gap: 2px; 
+                        display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; 
                         background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; 
-                        max-width: 600px; border: 3px solid rgba(255,255,255,0.3);">
-                        <!-- Grid cells will be generated here -->
+                        border: 3px solid rgba(255,255,255,0.3); max-width: 500px;">
+                        <!-- Letter grid cells will be generated here -->
                     </div>
                 </div>
                 
@@ -230,24 +273,24 @@ class WordSearchGame {
                 <div class="word-lists" style="
                     display: flex; justify-content: space-around; margin-bottom: 25px; gap: 15px;">
                     
-                    <div class="word-list" data-sound="t" style="
+                    <div class="word-list" style="
                         background: rgba(52, 152, 219, 0.2); padding: 15px; border-radius: 10px; 
                         border: 2px solid #3498db; flex: 1; max-width: 200px;">
-                        <h4 style="margin-top: 0; color: #3498db; text-align: center;">🔵 /t/ 音</h4>
+                        <h4 style="margin-top: 0; color: #3498db; text-align: center;">/t/ 音</h4>
                         <div class="word-items" id="tWords"></div>
                     </div>
                     
-                    <div class="word-list" data-sound="d" style="
+                    <div class="word-list" style="
                         background: rgba(231, 76, 60, 0.2); padding: 15px; border-radius: 10px; 
                         border: 2px solid #e74c3c; flex: 1; max-width: 200px;">
-                        <h4 style="margin-top: 0; color: #e74c3c; text-align: center;">🔴 /d/ 音</h4>
+                        <h4 style="margin-top: 0; color: #e74c3c; text-align: center;">/d/ 音</h4>
                         <div class="word-items" id="dWords"></div>
                     </div>
                     
-                    <div class="word-list" data-sound="id" style="
+                    <div class="word-list" style="
                         background: rgba(46, 204, 113, 0.2); padding: 15px; border-radius: 10px; 
                         border: 2px solid #2ecc71; flex: 1; max-width: 200px;">
-                        <h4 style="margin-top: 0; color: #2ecc71; text-align: center;">🟢 /ɪd/ 音</h4>
+                        <h4 style="margin-top: 0; color: #2ecc71; text-align: center;">/ɪd/ 音</h4>
                         <div class="word-items" id="idWords"></div>
                     </div>
                 </div>
@@ -257,8 +300,8 @@ class WordSearchGame {
                     text-align: center; background: rgba(255,255,255,0.1); 
                     padding: 20px; border-radius: 15px; margin-bottom: 20px;">
                     
-                    <div style="margin-bottom: 15px;">
-                        選中的單詞: <span id="selectedWordDisplay" style="color: #fbbf24; font-weight: bold; font-size: 18px;">無</span>
+                    <div style="margin-bottom: 15px; font-size: 18px;">
+                        選中的單詞: <span id="selectedWordDisplay" style="color: #fbbf24; font-weight: bold;">無</span>
                     </div>
                     
                     <div style="display: flex; justify-content: center; gap: 15px;">
@@ -266,13 +309,13 @@ class WordSearchGame {
                             background: linear-gradient(45deg, #4ecca3, #2ecc71); color: white; border: none; 
                             padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; 
                             cursor: pointer; transition: all 0.3s ease;" disabled>
-                            ✅ 確認單詞
+                            ✅ 確認
                         </button>
                         <button id="clearSelectionBtn" class="control-btn" style="
                             background: linear-gradient(45deg, #f39c12, #e67e22); color: white; border: none; 
                             padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: bold; 
                             cursor: pointer; transition: all 0.3s ease;">
-                            🔄 清除選擇
+                            🔄 清除
                         </button>
                         <button id="pronounceWordBtn" class="control-btn" style="
                             background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; border: none; 
@@ -285,7 +328,7 @@ class WordSearchGame {
                 
                 <!-- Back Button -->
                 <div style="text-align: center;">
-                    <button onclick="window.gameSystem?.showGameMenu()" style="
+                    <button id="wordSearchBackBtn" style="
                         background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5); 
                         padding: 15px 30px; border-radius: 10px; font-size: 16px; font-weight: bold; 
                         cursor: pointer; transition: all 0.3s ease;">
@@ -298,22 +341,25 @@ class WordSearchGame {
             .word-search-board .cell {
                 width: 35px;
                 height: 35px;
-                background: rgba(255,255,255,0.9);
+                background: rgba(255,255,255,0.95);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-weight: bold;
+                font-size: 16px;
                 cursor: pointer;
                 border-radius: 5px;
                 transition: all 0.2s ease;
                 user-select: none;
                 border: 2px solid transparent;
+                color: #333;
             }
             
             .word-search-board .cell:hover {
                 background: rgba(76, 204, 163, 0.8);
                 color: white;
                 transform: scale(1.1);
+                border-color: #4ecca3;
             }
             
             .word-search-board .cell.selected {
@@ -327,6 +373,13 @@ class WordSearchGame {
                 background: #2ecc71 !important;
                 color: white;
                 border-color: #27ae60;
+                animation: foundPulse 0.5s ease-in-out;
+            }
+            
+            @keyframes foundPulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.2); }
+                100% { transform: scale(1.05); }
             }
             
             .sound-btn:hover, .control-btn:hover {
@@ -337,6 +390,7 @@ class WordSearchGame {
             .sound-btn.selected {
                 transform: scale(1.1);
                 box-shadow: 0 0 20px currentColor;
+                border: 3px solid rgba(255,255,255,0.5);
             }
             
             .control-btn:disabled {
@@ -353,20 +407,28 @@ class WordSearchGame {
                 text-align: center;
                 font-weight: bold;
                 transition: all 0.3s ease;
+                font-size: 14px;
             }
             
             .word-item.found {
                 background: rgba(46, 204, 113, 0.8);
                 color: white;
+                animation: wordFound 0.5s ease-in-out;
+            }
+            
+            @keyframes wordFound {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
             }
             </style>
         `;
         
-        this.setupGameControls();
+        this.log('Game interface created successfully');
     }
     
     setupGameControls() {
-        this.log('Setting up game controls');
+        this.log('Setting up game controls and event listeners');
         
         // Sound selection buttons
         document.querySelectorAll('.sound-btn').forEach(btn => {
@@ -390,16 +452,35 @@ class WordSearchGame {
         document.getElementById('clearSelectionBtn').addEventListener('click', () => this.clearSelection());
         document.getElementById('pronounceWordBtn').addEventListener('click', () => this.pronounceSelectedWord());
         
-        // Grid cell interactions will be set up when board is generated
+        // Back button
+        document.getElementById('wordSearchBackBtn').addEventListener('click', () => {
+            if (this.gameSystem) {
+                this.gameSystem.showGameMenu();
+            } else {
+                // Fallback
+                const gameContainer = document.getElementById('wordSearch');
+                if (gameContainer) {
+                    gameContainer.style.display = 'none';
+                }
+                const gameMenu = document.getElementById('gameMenu');
+                if (gameMenu) {
+                    gameMenu.style.display = 'block';
+                }
+            }
+        });
+        
+        this.log('Game controls set up successfully');
     }
     
     resetGame() {
+        this.log('Resetting game state');
         this.score = 0;
         this.foundWords = [];
         this.selectedWords = [];
         this.currentSelection = [];
         this.selectedSound = null;
         this.isGameActive = true;
+        this.placedWords = [];
         
         // Select 5 words from each category for this game
         this.targetWords = [];
@@ -410,19 +491,25 @@ class WordSearchGame {
             });
         });
         
-        this.log(`Game reset. Target words: ${this.targetWords.length}`);
+        this.log(`Game reset complete. Target words: ${this.targetWords.length}`);
     }
     
     generateGameBoard() {
-        this.log('Generating game board');
+        this.log('🎯 Starting game board generation');
         
         // Create empty board
         this.gameBoard = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(''));
         
-        // Place target words
+        // Place target words on board
+        let wordsPlaced = 0;
         this.targetWords.forEach(wordObj => {
-            this.placeWordOnBoard(wordObj.word.toUpperCase());
+            if (this.placeWordOnBoard(wordObj.word.toUpperCase())) {
+                wordsPlaced++;
+                this.log(`Placed word: ${wordObj.word}`);
+            }
         });
+        
+        this.log(`Successfully placed ${wordsPlaced} words on board`);
         
         // Fill empty cells with random letters
         for (let row = 0; row < this.boardSize; row++) {
@@ -433,36 +520,43 @@ class WordSearchGame {
             }
         }
         
+        this.log('Empty cells filled with random letters');
         this.renderBoard();
     }
     
     placeWordOnBoard(word) {
         const directions = [
-            [0, 1],   // horizontal
-            [1, 0],   // vertical
+            [0, 1],   // horizontal right
+            [1, 0],   // vertical down
             [1, 1],   // diagonal down-right
             [-1, 1]   // diagonal up-right
         ];
         
-        let placed = false;
         let attempts = 0;
+        const maxAttempts = 100;
         
-        while (!placed && attempts < 50) {
+        while (attempts < maxAttempts) {
             const direction = directions[Math.floor(Math.random() * directions.length)];
-            const row = Math.floor(Math.random() * this.boardSize);
-            const col = Math.floor(Math.random() * this.boardSize);
+            const startRow = Math.floor(Math.random() * this.boardSize);
+            const startCol = Math.floor(Math.random() * this.boardSize);
             
-            if (this.canPlaceWord(word, row, col, direction)) {
-                this.placeWord(word, row, col, direction);
-                placed = true;
+            if (this.canPlaceWord(word, startRow, startCol, direction)) {
+                this.placeWord(word, startRow, startCol, direction);
+                this.placedWords.push({
+                    word,
+                    startRow,
+                    startCol,
+                    direction,
+                    cells: this.getWordCells(word, startRow, startCol, direction)
+                });
+                return true;
             }
             
             attempts++;
         }
         
-        if (!placed) {
-            this.log(`Could not place word: ${word}`);
-        }
+        this.log(`Could not place word: ${word} after ${attempts} attempts`);
+        return false;
     }
     
     canPlaceWord(word, startRow, startCol, direction) {
@@ -470,10 +564,12 @@ class WordSearchGame {
             const row = startRow + direction[0] * i;
             const col = startCol + direction[1] * i;
             
+            // Check bounds
             if (row < 0 || row >= this.boardSize || col < 0 || col >= this.boardSize) {
                 return false;
             }
             
+            // Check if cell is empty or already has the same letter
             if (this.gameBoard[row][col] !== '' && this.gameBoard[row][col] !== word[i]) {
                 return false;
             }
@@ -489,12 +585,29 @@ class WordSearchGame {
         }
     }
     
+    getWordCells(word, startRow, startCol, direction) {
+        const cells = [];
+        for (let i = 0; i < word.length; i++) {
+            const row = startRow + direction[0] * i;
+            const col = startCol + direction[1] * i;
+            cells.push({ row, col });
+        }
+        return cells;
+    }
+    
     renderBoard() {
         const boardElement = document.getElementById('wordSearchBoard');
-        if (!boardElement) return;
+        if (!boardElement) {
+            console.error('Board element not found!');
+            return;
+        }
         
+        this.log('🎨 Rendering game board with letters');
+        
+        // Clear existing board
         boardElement.innerHTML = '';
         
+        // Create grid cells
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('div');
@@ -503,84 +616,123 @@ class WordSearchGame {
                 cell.dataset.row = row;
                 cell.dataset.col = col;
                 
-                cell.addEventListener('click', () => this.selectCell(row, col));
-                cell.addEventListener('mouseenter', () => this.highlightPath(row, col));
+                // Add click event for cell selection
+                cell.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.selectCell(row, col, e);
+                });
+                
+                // Add hover events for better UX
+                cell.addEventListener('mouseenter', () => this.highlightCell(row, col));
                 
                 boardElement.appendChild(cell);
             }
         }
         
-        this.log('Game board rendered');
+        this.log(`✅ Game board rendered successfully with ${this.boardSize}x${this.boardSize} letters`);
+        
+        // Verify letters are actually showing
+        const cellsWithText = boardElement.querySelectorAll('.cell').length;
+        this.log(`Board verification: ${cellsWithText} cells created`);
     }
     
-    selectCell(row, col) {
+    selectCell(row, col, event) {
         const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return;
         
-        if (this.currentSelection.length === 0) {
-            // Start new selection
-            this.currentSelection = [{ row, col }];
-            cell.classList.add('selected');
+        if (event.shiftKey && this.currentSelection.length > 0) {
+            // Multi-select: create line from first to current cell
+            this.selectLine(this.currentSelection[0], { row, col });
+        } else if (cell.classList.contains('selected')) {
+            // Deselect cell
+            cell.classList.remove('selected');
+            this.currentSelection = this.currentSelection.filter(c => !(c.row === row && c.col === col));
         } else {
-            // Continue or complete selection
-            const lastCell = this.currentSelection[this.currentSelection.length - 1];
-            
-            if (this.isAdjacent(lastCell, { row, col }) || this.isInLine(this.currentSelection[0], { row, col })) {
-                this.currentSelection.push({ row, col });
-                cell.classList.add('selected');
-                
-                // Check if word is complete
-                this.checkSelectedWord();
-            } else {
-                // Invalid selection - clear and start new
+            // Single select or add to selection
+            if (!event.ctrlKey && !event.metaKey) {
                 this.clearSelection();
-                this.selectCell(row, col);
+            }
+            cell.classList.add('selected');
+            this.currentSelection.push({ row, col });
+        }
+        
+        this.updateSelectedWord();
+        this.log(`Cell selected: (${row}, ${col}). Current selection length: ${this.currentSelection.length}`);
+    }
+    
+    selectLine(start, end) {
+        this.clearSelection();
+        
+        const cells = this.getLineCells(start, end);
+        cells.forEach(cellPos => {
+            const cell = document.querySelector(`[data-row="${cellPos.row}"][data-col="${cellPos.col}"]`);
+            if (cell) {
+                cell.classList.add('selected');
+                this.currentSelection.push(cellPos);
+            }
+        });
+        
+        this.updateSelectedWord();
+    }
+    
+    getLineCells(start, end) {
+        const cells = [];
+        const dx = end.col - start.col;
+        const dy = end.row - start.row;
+        const distance = Math.max(Math.abs(dx), Math.abs(dy));
+        
+        if (distance === 0) {
+            return [start];
+        }
+        
+        const stepX = dx / distance;
+        const stepY = dy / distance;
+        
+        for (let i = 0; i <= distance; i++) {
+            const row = Math.round(start.row + stepY * i);
+            const col = Math.round(start.col + stepX * i);
+            if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
+                cells.push({ row, col });
             }
         }
-    }
-    
-    isAdjacent(cell1, cell2) {
-        const rowDiff = Math.abs(cell1.row - cell2.row);
-        const colDiff = Math.abs(cell1.col - cell2.col);
-        return rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff > 0);
-    }
-    
-    isInLine(startCell, endCell) {
-        const rowDiff = endCell.row - startCell.row;
-        const colDiff = endCell.col - startCell.col;
         
-        if (rowDiff === 0 || colDiff === 0 || Math.abs(rowDiff) === Math.abs(colDiff)) {
-            return true;
-        }
-        return false;
+        return cells;
     }
     
-    checkSelectedWord() {
-        if (this.currentSelection.length < 3) return;
-        
+    updateSelectedWord() {
         const selectedWord = this.getSelectedWord();
-        const wordObj = this.targetWords.find(w => w.word.toUpperCase() === selectedWord);
+        document.getElementById('selectedWordDisplay').textContent = selectedWord || '無';
         
-        if (wordObj && !this.foundWords.includes(selectedWord)) {
-            document.getElementById('selectedWordDisplay').textContent = selectedWord.toLowerCase();
-            document.getElementById('confirmWordBtn').disabled = false;
-            document.getElementById('pronounceWordBtn').disabled = false;
+        const confirmBtn = document.getElementById('confirmWordBtn');
+        const pronounceBtn = document.getElementById('pronounceWordBtn');
+        
+        if (selectedWord && selectedWord.length >= 3) {
+            confirmBtn.disabled = false;
+            pronounceBtn.disabled = false;
+        } else {
+            confirmBtn.disabled = true;
+            pronounceBtn.disabled = true;
         }
     }
     
     getSelectedWord() {
-        return this.currentSelection.map(cell => this.gameBoard[cell.row][cell.col]).join('');
+        if (this.currentSelection.length === 0) return '';
+        
+        return this.currentSelection
+            .map(cell => this.gameBoard[cell.row][cell.col])
+            .join('');
     }
     
     confirmWord() {
         if (!this.selectedSound) {
-            alert('請先選擇發音類型！');
+            this.showMessage('請先選擇發音類型！', 'warning');
             return;
         }
         
         const selectedWord = this.getSelectedWord();
         const wordObj = this.targetWords.find(w => w.word.toUpperCase() === selectedWord);
         
-        if (wordObj) {
+        if (wordObj && !this.foundWords.includes(selectedWord)) {
             if (wordObj.type === this.selectedSound) {
                 // Correct classification
                 this.foundWords.push(selectedWord);
@@ -589,27 +741,26 @@ class WordSearchGame {
                 // Mark cells as found
                 this.currentSelection.forEach(cell => {
                     const cellElement = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
-                    cellElement.classList.add('found');
-                    cellElement.classList.remove('selected');
+                    if (cellElement) {
+                        cellElement.classList.add('found');
+                        cellElement.classList.remove('selected');
+                    }
                 });
                 
                 // Add to appropriate word list
                 this.addWordToList(wordObj.word, wordObj.type);
                 
-                // Play correct sound
-                if (window.SoundSystem) {
-                    window.SoundSystem.play('correct');
-                }
+                this.showMessage(`✅ 正確！${wordObj.word} 是 /${wordObj.type}/ 音`, 'success');
                 
-                this.gameSystem?.showMessage(`✅ 正確！${wordObj.word} 是 /${wordObj.type}/ 音`, 2000);
+                this.log(`Correct word found: ${wordObj.word} (${wordObj.type})`);
             } else {
-                // Wrong classification
-                this.gameSystem?.showMessage(`❌ 錯誤！${wordObj.word} 不是 /${this.selectedSound}/ 音`, 2000);
-                
-                if (window.SoundSystem) {
-                    window.SoundSystem.play('wrong');
-                }
+                this.showMessage(`❌ 錯誤！${wordObj.word} 不是 /${this.selectedSound}/ 音`, 'error');
+                this.log(`Wrong classification: ${wordObj.word} is ${wordObj.type}, not ${this.selectedSound}`);
             }
+        } else if (wordObj && this.foundWords.includes(selectedWord)) {
+            this.showMessage('這個單詞已經找過了！', 'warning');
+        } else {
+            this.showMessage('這不是一個有效的單詞', 'error');
         }
         
         this.clearSelection();
@@ -637,39 +788,69 @@ class WordSearchGame {
         });
         
         this.currentSelection = [];
-        document.getElementById('selectedWordDisplay').textContent = '無';
-        document.getElementById('confirmWordBtn').disabled = true;
-        document.getElementById('pronounceWordBtn').disabled = true;
+        this.updateSelectedWord();
+    }
+    
+    highlightCell(row, col) {
+        // Optional: Add hover effects or path highlighting
     }
     
     pronounceSelectedWord() {
         const selectedWord = this.getSelectedWord().toLowerCase();
-        if (window.SoundSystem && window.SoundSystem.speakWord) {
-            window.SoundSystem.speakWord(selectedWord);
+        if (window.speechSynthesis && selectedWord) {
+            const utterance = new SpeechSynthesisUtterance(selectedWord);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
         }
-    }
-    
-    highlightPath(row, col) {
-        // Visual feedback for path building (optional enhancement)
     }
     
     updateDisplay() {
         document.getElementById('wordSearchScore').textContent = this.score;
         document.getElementById('wordsFound').textContent = this.foundWords.length;
         
-        // Update game system score
-        this.gameSystem?.updateScore('wordSearch', this.score, true);
+        if (this.gameSystem) {
+            this.gameSystem.updateScore('wordSearch', this.score, true);
+        }
+    }
+    
+    showMessage(message, type = 'info') {
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = message;
+        messageDiv.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: ${type === 'success' ? '#2ecc71' : 
+                        type === 'error' ? '#e74c3c' : 
+                        type === 'warning' ? '#f39c12' : '#3498db'}; 
+            color: white; padding: 20px 30px; border-radius: 10px; font-size: 18px; 
+            font-weight: bold; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: messageSlide 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translate(-50%, -50%) scale(0.8)';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }
+        }, 2000);
     }
     
     completeGame() {
         this.isGameActive = false;
+        this.showMessage('🎉 恭喜！石橋修復完成！你找到了所有單詞！', 'success');
         
-        this.gameSystem?.showMessage('🎉 石橋修復完成！你成功找到了所有單詞！', 4000);
-        
-        // Mark level as complete
         setTimeout(() => {
-            this.gameSystem?.checkLevelCompletion('wordSearch');
-        }, 2000);
+            if (this.gameSystem) {
+                this.gameSystem.showGameMenu();
+            }
+        }, 3000);
     }
     
     stopGame() {
@@ -680,15 +861,40 @@ class WordSearchGame {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('📋 Word Search game script loaded');
+    
     const checkGameSystem = () => {
         if (window.gameSystem) {
             window.wordSearchGame = new WordSearchGame(window.gameSystem);
-            console.log('✅ Word Search Stone Bridge game initialized');
+            console.log('✅ Word Search Stone Bridge game initialized successfully');
         } else {
+            // Fallback initialization
             setTimeout(checkGameSystem, 100);
         }
     };
+    
+    // Start checking immediately
     checkGameSystem();
+    
+    // Also check when container becomes visible
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const target = mutation.target;
+                if (target.id === 'wordSearch' && target.style.display !== 'none') {
+                    if (!window.wordSearchGame) {
+                        console.log('🎯 Word search container became visible, initializing...');
+                        window.wordSearchGame = new WordSearchGame(window.gameSystem);
+                    }
+                }
+            }
+        });
+    });
+    
+    const wordSearchContainer = document.getElementById('wordSearch');
+    if (wordSearchContainer) {
+        observer.observe(wordSearchContainer, { attributes: true, attributeFilter: ['style'] });
+    }
 });
 
 // Export for use in other modules
