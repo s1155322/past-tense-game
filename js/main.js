@@ -1,131 +1,307 @@
 /**
- * Main Application Entry Point - Fixed Version
+ * Game System - Core game management system
+ * Handles navigation, state management, and game coordination
  */
-console.log('Main.js loading...');
-
-// Simple initialization without async/await to avoid syntax errors
-function initializeApp() {
-    console.log('Initializing Language Learning App...');
-    
-    // Show loading screen
-    showLoadingScreen();
-    
-    // Check if Sound System is available
-    if (window.SoundSystem) {
-        console.log('Sound system available');
-    } else {
-        console.log('Sound system not available');
+class GameSystem {
+    constructor() {
+        this.currentGame = null;
+        this.gameInstances = {};
+        this.score = 0;
+        this.level = 1;
+        this.gameProgress = {
+            wordSearch: { completed: false, score: 0 },
+            fallingWords: { completed: false, score: 0 },
+            multipleChoice: { completed: false, score: 0 },
+            bossFight: { completed: false, score: 0 }
+        };
+        
+        console.log('🎮 GameSystem initialized');
+        this.init();
     }
     
-    // Initialize after short delay
-    setTimeout(() => {
-        try {
-            // Game System should be initialized by gamesystem.js
-            if (window.gameSystem) {
-                console.log('Game System found');
-                hideLoadingScreen();
-                console.log('App initialized successfully!');
-            } else {
-                console.log('Waiting for Game System...');
-                // Try again after more time
-                setTimeout(() => {
-                    if (window.gameSystem) {
-                        console.log('Game System found on retry');
-                        hideLoadingScreen();
-                        console.log('App initialized successfully!');
-                    } else {
-                        console.error('Game System failed to initialize');
-                        showErrorMessage('Failed to load the game. Please refresh the page.');
-                    }
-                }, 1000);
-            }
-        } catch (error) {
-            console.error('Failed to initialize app:', error);
-            showErrorMessage('Failed to load the game. Please refresh the page.');
-        }
-    }, 500);
-}
-
-function showLoadingScreen() {
-    // Check if loading screen already exists
-    let loadingScreen = document.getElementById('loadingScreen');
-    
-    if (!loadingScreen) {
-        loadingScreen = document.createElement('div');
-        loadingScreen.id = 'loadingScreen';
-        loadingScreen.innerHTML = `
-            <div style="
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-                background: linear-gradient(135deg, #2d3142 0%, #4f5d75 100%); 
-                display: flex; align-items: center; justify-content: center; 
-                z-index: 9999; color: white; font-family: Arial, sans-serif;">
-                
-                <div style="text-align: center;">
-                    <div style="
-                        width: 60px; height: 60px; border: 4px solid rgba(76, 204, 163, 0.3); 
-                        border-top: 4px solid #4ecca3; border-radius: 50%; 
-                        animation: spin 1s linear infinite; margin: 0 auto 30px;">
-                    </div>
-                    <h2 style="margin: 0 0 15px 0; font-size: 32px; color: #4ecca3;">
-                        Loading Language Quest Adventure...
-                    </h2>
-                    <p style="margin: 0; font-size: 18px; color: #bfc0c0;">
-                        正在加載英語過去式發音學習遊戲...
-                    </p>
-                </div>
-                
-                <style>
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-                </style>
-            </div>
-        `;
-        document.body.appendChild(loadingScreen);
+    init() {
+        this.setupEventListeners();
+        this.showMainMenu();
     }
     
-    loadingScreen.style.display = 'flex';
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'none';
+    setupEventListeners() {
+        console.log('🔧 Setting up GameSystem event listeners');
+        
+        // Main menu buttons
+        document.getElementById('startGame').addEventListener('click', () => {
+            console.log('Start game clicked');
+            this.showStory();
+        });
+        
+        document.getElementById('instructionsBtn').addEventListener('click', () => {
+            this.showInstructions();
+        });
+        
+        document.getElementById('creditsBtn').addEventListener('click', () => {
+            this.showCredits();
+        });
+        
+        // Game menu buttons
+        document.getElementById('gameMenuBackBtn').addEventListener('click', () => {
+            this.showMainMenu();
+        });
+        
+        // Game selection buttons
+        document.querySelectorAll('.menu-button[data-game]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const gameType = e.currentTarget.dataset.game;
+                console.log('Game selected:', gameType);
+                this.startGame(gameType);
+            });
+        });
     }
-}
-
-function showErrorMessage(message) {
-    hideLoadingScreen();
     
-    const errorDiv = document.createElement('div');
-    errorDiv.innerHTML = `
-        <div style="
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: #2d3142; display: flex; align-items: center; justify-content: center; 
-            z-index: 9999; color: white; font-family: Arial, sans-serif;">
+    showMainMenu() {
+        console.log('📋 Showing main menu');
+        this.hideAllScreens();
+        document.getElementById('mainMenu').style.display = 'flex';
+        this.currentGame = null;
+    }
+    
+    showStory() {
+        console.log('📖 Showing story');
+        this.hideAllScreens();
+        const storyContainer = document.getElementById('storyContainer');
+        if (storyContainer) {
+            storyContainer.classList.add('active');
             
-            <div style="text-align: center; max-width: 500px; padding: 40px;">
-                <h1 style="color: #e74c3c; font-size: 48px; margin-bottom: 20px;">❌ Error</h1>
-                <p style="font-size: 20px; margin-bottom: 30px; line-height: 1.5;">
-                    ${message}
-                </p>
-                <button onclick="window.location.reload()" style="
-                    background: #4ecca3; color: white; border: none; padding: 15px 30px; 
-                    border-radius: 10px; font-size: 18px; cursor: pointer; font-weight: bold;">
-                    Refresh Page
-                </button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(errorDiv);
+            // Auto-play video if available
+            const video = document.getElementById('introVideo');
+            if (video && video.canPlayType) {
+                video.play().catch(() => {
+                    console.log('Video autoplay blocked - user interaction required');
+                });
+            }
+        } else {
+            // Skip to game menu if no video
+            this.showGameMenu();
+        }
+    }
+    
+    showGameMenu() {
+        console.log('🎮 Showing game menu');
+        this.hideAllScreens();
+        const gameMenu = document.getElementById('gameMenu');
+        if (gameMenu) {
+            gameMenu.classList.add('active');
+        }
+        this.currentGame = null;
+    }
+    
+    startGame(gameType) {
+        console.log(`🚀 Starting game: ${gameType}`);
+        this.hideAllScreens();
+        this.currentGame = gameType;
+        
+        // Show the game container
+        const gameContainer = document.getElementById(gameType);
+        if (gameContainer) {
+            gameContainer.classList.add('active');
+            
+            // Initialize the specific game
+            this.initializeGame(gameType);
+        } else {
+            console.error(`Game container not found: ${gameType}`);
+            this.showMessage('Game not found!', 'error');
+            this.showGameMenu();
+        }
+    }
+    
+    initializeGame(gameType) {
+        console.log(`🎯 Initializing game: ${gameType}`);
+        
+        // Dispatch game initialization event
+        const event = new CustomEvent('gameInitialize', {
+            detail: { gameType: gameType }
+        });
+        document.dispatchEvent(event);
+        
+        // Store reference to game instance
+        if (window[gameType + 'Game']) {
+            this.gameInstances[gameType] = window[gameType + 'Game'];
+        }
+    }
+    
+    showInstructions() {
+        this.showMessage('Instructions: Find past tense words and classify their pronunciation!', 'info', 5000);
+    }
+    
+    showCredits() {
+        this.showMessage('Created with ❤️ for English learning', 'info', 3000);
+    }
+    
+    hideAllScreens() {
+        // Hide main menu
+        document.getElementById('mainMenu').style.display = 'none';
+        
+        // Hide game menu
+        const gameMenu = document.getElementById('gameMenu');
+        if (gameMenu) {
+            gameMenu.classList.remove('active');
+        }
+        
+        // Hide story container
+        const storyContainer = document.getElementById('storyContainer');
+        if (storyContainer) {
+            storyContainer.classList.remove('active');
+        }
+        
+        // Hide all game containers
+        document.querySelectorAll('.game-container').forEach(container => {
+            container.classList.remove('active');
+        });
+    }
+    
+    updateScore(gameType, score, completed = false) {
+        console.log(`📊 Updating score for ${gameType}: ${score}`);
+        
+        if (this.gameProgress[gameType]) {
+            this.gameProgress[gameType].score = score;
+            this.gameProgress[gameType].completed = completed;
+            
+            // Update total score
+            this.score = Object.values(this.gameProgress).reduce((total, game) => total + game.score, 0);
+            
+            // Dispatch score update event
+            const event = new CustomEvent('scoreUpdate', {
+                detail: { gameType, score, totalScore: this.score, completed }
+            });
+            document.dispatchEvent(event);
+        }
+    }
+    
+    completeGame(gameType) {
+        console.log(`✅ Game completed: ${gameType}`);
+        this.updateScore(gameType, this.gameProgress[gameType].score, true);
+        
+        // Show completion message
+        this.showMessage(`🎉 ${gameType} completed!`, 'success');
+        
+        // Check if all games are completed
+        const allCompleted = Object.values(this.gameProgress).every(game => game.completed);
+        if (allCompleted) {
+            setTimeout(() => {
+                this.showFinalVictory();
+            }, 2000);
+        } else {
+            setTimeout(() => {
+                this.showGameMenu();
+            }, 2000);
+        }
+    }
+    
+    showFinalVictory() {
+        console.log('🏆 Showing final victory');
+        this.showMessage(`🏆 Congratulations! All games completed! Final score: ${this.score}`, 'success', 5000);
+        setTimeout(() => {
+            this.resetProgress();
+            this.showMainMenu();
+        }, 5000);
+    }
+    
+    resetProgress() {
+        console.log('🔄 Resetting game progress');
+        this.score = 0;
+        this.level = 1;
+        Object.keys(this.gameProgress).forEach(gameType => {
+            this.gameProgress[gameType] = { completed: false, score: 0 };
+        });
+    }
+    
+    showMessage(text, type = 'success', duration = 3000) {
+        // Use the global showMessage function
+        if (window.showMessage) {
+            window.showMessage(text, type, duration);
+        } else {
+            console.log(`Message: ${text}`);
+        }
+    }
+    
+    // Utility methods for games
+    playSound(soundType) {
+        const audioMap = {
+            correct: 'correctSound',
+            wrong: 'wrongSound',
+            bgm: 'bgmAudio'
+        };
+        
+        const audioId = audioMap[soundType];
+        if (audioId) {
+            const audio = document.getElementById(audioId);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {
+                    console.log('Audio play blocked - user interaction required');
+                });
+            }
+        }
+    }
+    
+    speakText(text, lang = 'en-US') {
+        if (window.speechSynthesis) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+    
+    // Game state management
+    saveGameState() {
+        const gameState = {
+            score: this.score,
+            level: this.level,
+            progress: this.gameProgress,
+            currentGame: this.currentGame
+        };
+        
+        try {
+            localStorage.setItem('englishGameState', JSON.stringify(gameState));
+            console.log('Game state saved');
+        } catch (e) {
+            console.log('Could not save game state');
+        }
+    }
+    
+    loadGameState() {
+        try {
+            const saved = localStorage.getItem('englishGameState');
+            if (saved) {
+                const gameState = JSON.parse(saved);
+                this.score = gameState.score || 0;
+                this.level = gameState.level || 1;
+                this.gameProgress = gameState.progress || this.gameProgress;
+                console.log('Game state loaded');
+                return true;
+            }
+        } catch (e) {
+            console.log('Could not load game state');
+        }
+        return false;
+    }
+    
+    // Language support
+    getCurrentLanguage() {
+        return window.gameState?.currentLanguage || 'en';
+    }
+    
+    getTranslation(key) {
+        const lang = this.getCurrentLanguage();
+        return window.translations?.[lang]?.[key] || key;
+    }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
+// Export for use in other modules
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = GameSystem;
 }
 
-console.log('Main.js loaded successfully');
+// Make available globally
+window.GameSystem = GameSystem;
+
+console.log('✅ GameSystem class loaded successfully');
