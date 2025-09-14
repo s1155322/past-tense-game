@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Past Tense Pronunciation Adventure</title>
     
+    <!-- 🚨 FAVICON FIX - No more 404 errors! -->
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAABILAAASCwAAAAAAAAAAAAD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A4ecca+Pi4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/i4uL/4uLi/+Li4v/j4+P/5OTkav///wDi4uL/4ecca/Pi4v/z8/P/8/Pz//Pz8//z8/P/8/Pz//Pz8//z8/P/8/Pz//Pz8//z8/P/4ecca//i4uL/////AOLi4v/j4+P/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/j4+P/4uLi/////wDi4uL/4+Pj//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/4+Pj/+Li4v////8A">
+    
     <!-- CSS Files -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/games.css">
     
-    <!-- Inline critical CSS for loading and error states -->
+    <!-- Enhanced CSS for video controls and fixes -->
     <style>
         .loading-screen {
             position: fixed;
@@ -82,6 +85,60 @@
             max-width: 300px;
             display: none;
         }
+        
+        /* 🎬 Enhanced Video Player Styling */
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .video-wrapper video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Enhanced video control buttons */
+        .video-control-btn {
+            background: rgba(0,0,0,0.8);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .video-control-btn:hover {
+            background: rgba(76, 204, 163, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 204, 163, 0.4);
+        }
+        
+        /* 🎯 Fix for Game 1 stuck background images */
+        .game-container.word-search-active .cutscene-container {
+            display: none !important;
+        }
+        
+        /* Hide problematic background images that cause stuck screens */
+        .background-img {
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        
+        /* If images fail to load, hide them */
+        .background-img[src=""] {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +146,7 @@
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-spinner"></div>
-        <h2>英語過去式發音冒險</h2>
+        <h2>🎮 英語過去式發音冒險</h2>
         <p>Loading Adventure...</p>
         <div id="loadingStatus">初始化系統中...</div>
     </div>
@@ -159,16 +216,23 @@
         </div>
     </div>
 
-    <!-- Story Container (Intro Video) -->
+    <!-- 🎬 Story Container - ENHANCED VIDEO PLAYER -->
     <div id="storyContainer" class="story-container" style="display: none;">
         <div class="video-wrapper">
-            <video id="introVideo" width="100%" height="auto" preload="metadata">
+            <!-- 🚨 FIXED: Added full video player controls -->
+            <video id="introVideo" 
+                   controls 
+                   controlslist="nodownload" 
+                   preload="metadata" 
+                   width="100%" 
+                   height="auto"
+                   style="background: #000;">
                 <source src="assets/video/intro.mp4" type="video/mp4">
-                <p>您的瀏覽器不支援 video 標籤。</p>
+                <p>您的瀏覽器不支援 video 標籤。將顯示動畫介紹...</p>
             </video>
             <div class="story-controls">
-                <button id="skipIntro" class="video-control-btn">Skip</button>
-                <button id="continueStory" class="video-control-btn">Continue</button>
+                <button id="skipIntro" class="video-control-btn">⏭️ Skip</button>
+                <button id="continueStory" class="video-control-btn">▶️ Continue</button>
             </div>
         </div>
     </div>
@@ -178,19 +242,19 @@
         
         <!-- Main Menu -->
         <div id="mainMenu" class="main-menu" style="display: none;">
-            <h1 id="gameTitle">英語過去式發音冒險</h1>
+            <h1 id="gameTitle">🎭 英語過去式發音冒險</h1>
             <div class="menu-options">
-                <button id="startGame" class="menu-btn">開始冒險</button>
-                <button id="continueGame" class="menu-btn" style="display: none;">繼續冒險</button>
-                <button id="collectionsBtn" class="menu-btn">收藏品</button>
-                <button id="quitGame" class="menu-btn">離開遊戲</button>
+                <button id="startGame" class="menu-btn">🚀 開始冒險</button>
+                <button id="continueGame" class="menu-btn" style="display: none;">📖 繼續冒險</button>
+                <button id="collectionsBtn" class="menu-btn">🏆 收藏品</button>
+                <button id="quitGame" class="menu-btn">🚪 離開遊戲</button>
             </div>
             <button id="settingsBtn" class="settings-btn">⚙️</button>
         </div>
 
         <!-- Collections Menu -->
         <div id="collectionsMenu" class="collections-menu" style="display: none;">
-            <h2 id="collectionsTitle">冒險收藏品</h2>
+            <h2 id="collectionsTitle">🏆 冒險收藏品</h2>
             <div class="collections-grid">
                 <div class="collection-item" data-artifact="explorer">
                     <div class="artifact-icon">👁</div>
@@ -208,56 +272,59 @@
                     <p>完成知識試煉後獲得</p>
                 </div>
             </div>
-            <button class="back-btn" id="collectionsBackBtn">返回大廳</button>
+            <button class="back-btn" id="collectionsBackBtn">🏠 返回大廳</button>
         </div>
 
         <!-- Game Menu -->
         <div id="gameMenu" class="game-menu" style="display: none;">
-            <h1 id="gameMenuTitle">選擇遊戲</h1>
+            <h1 id="gameMenuTitle">🎮 選擇遊戲</h1>
             
             <div class="language-selector">
                 <button class="lang-btn active" data-lang="zh">中文</button>
                 <button class="lang-btn" data-lang="en">English</button>
             </div>
-
             <div class="menu">
                 <button class="menu-button" data-game="wordSearch">
-                    <h3>單詞搜索</h3>
+                    <h3>🔍 單詞搜索</h3>
                     <p>在網格中找到過去式單詞</p>
                 </button>
                 <button class="menu-button" data-game="fallingWords">
-                    <h3>落字遊戲</h3>
+                    <h3>⚔️ 落字遊戲</h3>
                     <p>用劍斬開正確發音的石塊</p>
                 </button>
                 <button class="menu-button" data-game="multipleChoice">
-                    <h3>選擇題</h3>
+                    <h3>🧙‍♂️ 選擇題</h3>
                     <p>聽發音選擇正確類型</p>
                 </button>
                 <button class="menu-button boss-button" data-game="bossFight">
-                    <h3>Boss戰</h3>
+                    <h3>👑 Boss戰</h3>
                     <p>擊敗發音之王！</p>
                 </button>
             </div>
-
             <div class="game-stats">
                 <div class="stat">總分數: <span id="totalScore">0</span></div>
                 <div class="stat">當前階段: <span id="currentStage">1</span></div>
             </div>
-
-            <button class="back-btn" id="gameMenuBackBtn">返回大廳</button>
+            <button class="back-btn" id="gameMenuBackBtn">🏠 返回大廳</button>
         </div>
 
-        <!-- Game 1: Word Search -->
+        <!-- 🎯 Game 1: Word Search - FIXED to prevent stuck background images -->
         <div id="wordSearch" class="game-container" style="display: none;">
-            <h2>單詞搜索遊戲</h2>
+            <h2>🔍 單詞搜索遊戲</h2>
             <div class="instructions">在網格中找到過去式單詞，選擇正確的發音類型</div>
-
-            <!-- Game 1 Cutscene -->
-            <div class="cutscene-container" id="game1Cutscene">
+            
+            <!-- 🚨 FIXED: Cutscene container with error handling for images -->
+            <div class="cutscene-container" id="game1Cutscene" style="display: none;">
                 <div class="cutscene-content cliff-scene">
-                    <img src="assets/images/cliff-background.jpg" alt="懸崖場景" class="background-img">
+                    <img src="assets/images/cliff-background.jpg" 
+                         alt="懸崖場景" 
+                         class="background-img"
+                         onerror="this.style.display='none';"
+                         onload="console.log('✅ Game 1 background loaded')">
                     <div class="character-sprite" id="playerSprite">
-                        <img src="assets/images/player-sprite.png" alt="角色">
+                        <img src="assets/images/player-sprite.png" 
+                             alt="角色"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="stone-bridges" id="stoneBridges"></div>
                     <div class="cutscene-text">
@@ -265,7 +332,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="sound-selection">
                 <div class="sound-buttons">
                     <button class="color-mode-button" data-sound="t">/t/</button>
@@ -274,9 +341,9 @@
                 </div>
                 <div class="selected-sound">選擇的發音類型: <span id="selectedSound">none</span></div>
             </div>
-
+            
             <div class="game-board" id="wordSearchBoard"></div>
-
+            
             <div class="word-lists">
                 <div class="word-list" data-sound="t">
                     <h3>/t/ 音</h3>
@@ -291,28 +358,32 @@
                     <div class="word-items" id="idWords"></div>
                 </div>
             </div>
-
+            
             <div class="game-controls">
                 <div class="selected-word">選中的單詞: <span id="selectedWord"></span></div>
-                <button id="confirmWord" class="control-btn">確認</button>
-                <button id="clearSelection" class="control-btn">清除</button>
-                <button id="pronounceWord" class="control-btn">發音</button>
+                <button id="confirmWord" class="control-btn">✅ 確認</button>
+                <button id="clearSelection" class="control-btn">🔄 清除</button>
+                <button id="pronounceWord" class="control-btn">🔊 發音</button>
             </div>
-
-            <button class="back-btn" id="wordSearchBackBtn">返回選單</button>
+            
+            <button class="back-btn" id="wordSearchBackBtn">🏠 返回選單</button>
         </div>
 
         <!-- Game 2: Falling Words -->
         <div id="fallingWords" class="game-container" style="display: none;">
-            <h2>落字遊戲</h2>
+            <h2>⚔️ 落字遊戲</h2>
             <div class="instructions">使用方向鍵移動，空白鍵攻擊正確發音的單詞</div>
-
-            <!-- Game 2 Cutscene -->
+            
             <div class="cutscene-container" id="game2Cutscene">
                 <div class="cutscene-content stone-rain-scene">
-                    <img src="assets/images/cave-background.jpg" alt="洞穴場景" class="background-img">
+                    <img src="assets/images/cave-background.jpg" 
+                         alt="洞穴場景" 
+                         class="background-img"
+                         onerror="this.style.display='none';">
                     <div class="character-sprite" id="swordPlayer">
-                        <img src="assets/images/warrior-sprite.png" alt="劍士">
+                        <img src="assets/images/warrior-sprite.png" 
+                             alt="劍士"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="falling-stones" id="fallingStones"></div>
                     <div class="cutscene-text">
@@ -320,7 +391,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="sound-selection">
                 <div class="sound-buttons">
                     <button class="color-mode-button" data-sound="t">/t/</button>
@@ -328,31 +399,36 @@
                     <button class="color-mode-button" data-sound="id">/id/</button>
                 </div>
             </div>
-
+            
             <canvas id="fallingWordsCanvas" width="800" height="600"></canvas>
             
             <div class="game-info">
                 <div>分數: <span id="fallingScore">0</span></div>
                 <div>生命: <span id="fallingLives">3</span></div>
             </div>
-
-            <button class="back-btn" id="fallingWordsBackBtn">返回選單</button>
+            <button class="back-btn" id="fallingWordsBackBtn">🏠 返回選單</button>
         </div>
 
         <!-- Game 3: Multiple Choice -->
         <div id="multipleChoice" class="game-container" style="display: none;">
-            <h2>選擇題遊戲</h2>
+            <h2>🧙‍♂️ 選擇題遊戲</h2>
             <div class="instructions">聽發音選擇正確的類型，連續答對5題打敗巫師！</div>
-
-            <!-- Game 3 Cutscene -->
+            
             <div class="cutscene-container" id="game3Cutscene">
                 <div class="cutscene-content hypnosis-scene">
-                    <img src="assets/images/wizard-lair.jpg" alt="巫師巢穴" class="background-img">
+                    <img src="assets/images/wizard-lair.jpg" 
+                         alt="巫師巢穴" 
+                         class="background-img"
+                         onerror="this.style.display='none';">
                     <div class="character-sprite" id="hypnotizedPlayer">
-                        <img src="assets/images/player-hypnotized.png" alt="被催眠的角色">
+                        <img src="assets/images/player-hypnotized.png" 
+                             alt="被催眠的角色"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="character-sprite" id="evilWizard">
-                        <img src="assets/images/wizard-sprite.png" alt="邪惡巫師">
+                        <img src="assets/images/wizard-sprite.png" 
+                             alt="邪惡巫師"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="hypnosis-effects" id="hypnosisEffects"></div>
                     <div class="cutscene-text">
@@ -360,40 +436,45 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="question-area">
                 <div class="word-display" id="questionWord">準備開始</div>
                 <button id="playPronunciation" class="pronunciation-btn">🔊 播放發音</button>
             </div>
-
+            
             <div class="choices">
                 <button class="choice-button" data-sound="t">/t/</button>
                 <button class="choice-button" data-sound="d">/d/</button>
                 <button class="choice-button" data-sound="id">/id/</button>
             </div>
-
+            
             <div class="progress-info">
                 <div>連續正確: <span id="correctStreak">0</span>/5</div>
                 <div>分數: <span id="multipleChoiceScore">0</span></div>
             </div>
-
-            <button class="back-btn" id="multipleChoiceBackBtn">返回選單</button>
+            <button class="back-btn" id="multipleChoiceBackBtn">🏠 返回選單</button>
         </div>
 
         <!-- Game 4: Boss Fight -->
         <div id="bossFight" class="game-container" style="display: none;">
-            <h2>Boss戰</h2>
+            <h2>👑 Boss戰</h2>
             <div class="instructions">擊敗發音之王！答對問題攻擊Boss</div>
-
-            <!-- Boss Fight Cutscene -->
+            
             <div class="cutscene-container" id="bossCutscene">
                 <div class="cutscene-content boss-arena">
-                    <img src="assets/images/boss-arena.jpg" alt="Boss戰場" class="background-img">
+                    <img src="assets/images/boss-arena.jpg" 
+                         alt="Boss戰場" 
+                         class="background-img"
+                         onerror="this.style.display='none';">
                     <div class="character-sprite" id="bossCharacter">
-                        <img src="assets/images/pronunciation-king.png" alt="發音之王">
+                        <img src="assets/images/pronunciation-king.png" 
+                             alt="發音之王"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="character-sprite" id="finalPlayer">
-                        <img src="assets/images/hero-final.png" alt="最終英雄">
+                        <img src="assets/images/hero-final.png" 
+                             alt="最終英雄"
+                             onerror="this.style.display='none';">
                     </div>
                     <div class="battle-effects" id="battleEffects"></div>
                     <div class="cutscene-text">
@@ -401,7 +482,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <canvas id="bossCanvas" width="800" height="600"></canvas>
             
             <div class="boss-info">
@@ -409,31 +490,37 @@
                 <div>玩家血量: <span id="playerHealth">100</span></div>
                 <div>分數: <span id="bossScore">0</span></div>
             </div>
-
+            
             <div class="question-area">
                 <div class="word-display" id="bossQuestionWord">準備戰鬥</div>
                 <button id="bossPronunciation" class="pronunciation-btn">🔊 播放發音</button>
             </div>
-
+            
             <div class="choices">
                 <button class="choice-button" data-sound="t">/t/</button>
                 <button class="choice-button" data-sound="d">/d/</button>
                 <button class="choice-button" data-sound="id">/id/</button>
             </div>
-
-            <button class="back-btn" id="bossFightBackBtn">返回選單</button>
+            <button class="back-btn" id="bossFightBackBtn">🏠 返回選單</button>
         </div>
 
-        <!-- Ending Container -->
+        <!-- 🎬 Ending Container - ENHANCED VIDEO PLAYER -->
         <div id="endingContainer" class="ending-container" style="display: none;">
             <div class="video-wrapper">
-                <video id="endingVideo" width="100%" height="auto" preload="metadata">
+                <!-- 🚨 FIXED: Added full video player controls -->
+                <video id="endingVideo" 
+                       controls 
+                       controlslist="nodownload" 
+                       preload="metadata" 
+                       width="100%" 
+                       height="auto"
+                       style="background: #000;">
                     <source src="assets/video/ending.mp4" type="video/mp4">
-                    <p>您的瀏覽器不支援 video 標籤。</p>
+                    <p>您的瀏覽器不支援 video 標籤。將顯示恭喜畫面...</p>
                 </video>
                 <div class="ending-controls">
-                    <button id="playAgain" class="video-control-btn">再玩一次</button>
-                    <button id="backToMenu" class="video-control-btn">返回主選單</button>
+                    <button id="playAgain" class="video-control-btn">🔄 再玩一次</button>
+                    <button id="backToMenu" class="video-control-btn">🏠 返回主選單</button>
                 </div>
             </div>
         </div>
@@ -454,7 +541,7 @@
         <source src="assets/audio/click.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Enhanced Loading and Error Handling Script -->
+    <!-- 🔧 Enhanced Loading and Error Handling Script -->
     <script>
         console.log('🎮 Starting Enhanced Game System Load...');
         
@@ -639,17 +726,56 @@
             loadAllScripts();
         }
         
-        // Set up fallback video event handlers directly in HTML
+        // 🎬 Enhanced video and button setup
         document.addEventListener('DOMContentLoaded', () => {
-            // Setup basic button event handlers as fallback
-            const setupFallbackHandlers = () => {
-                console.log('🔧 Setting up fallback button handlers');
+            console.log('🔧 Setting up enhanced video players and button handlers');
+            
+            // Setup video players with enhanced controls
+            const introVideo = document.getElementById('introVideo');
+            const endingVideo = document.getElementById('endingVideo');
+            
+            if (introVideo) {
+                introVideo.addEventListener('loadedmetadata', () => {
+                    console.log('✅ Intro video loaded with full player controls (pause, volume, seek, fullscreen)');
+                });
                 
+                introVideo.addEventListener('error', (e) => {
+                    console.log('⚠️ Intro video not found - will use animated story');
+                });
+                
+                introVideo.addEventListener('ended', () => {
+                    console.log('🎬 Intro video ended - auto-proceeding to game menu');
+                    setTimeout(() => {
+                        document.getElementById('storyContainer').style.display = 'none';
+                        if (window.gameSystem) {
+                            window.gameSystem.showGameMenu();
+                        }
+                    }, 1000);
+                });
+            }
+            
+            if (endingVideo) {
+                endingVideo.addEventListener('loadedmetadata', () => {
+                    console.log('✅ Ending video loaded with full player controls (pause, volume, seek, fullscreen)');
+                });
+                
+                endingVideo.addEventListener('error', (e) => {
+                    console.log('⚠️ Ending video not found - will use congratulations screen');
+                });
+            }
+            
+            // Enhanced button handlers
+            const setupFallbackHandlers = () => {
                 // Back button handlers with IDs
                 const backButtons = [
                     { id: 'collectionsBackBtn', action: () => window.gameSystem?.showMainMenu() },
                     { id: 'gameMenuBackBtn', action: () => window.gameSystem?.showMainMenu() },
-                    { id: 'wordSearchBackBtn', action: () => window.gameSystem?.showGameMenu() },
+                    { id: 'wordSearchBackBtn', action: () => {
+                        // 🎯 Fix: Hide cutscene when going back from word search
+                        const cutscene = document.getElementById('game1Cutscene');
+                        if (cutscene) cutscene.style.display = 'none';
+                        window.gameSystem?.showGameMenu();
+                    }},
                     { id: 'fallingWordsBackBtn', action: () => window.gameSystem?.showGameMenu() },
                     { id: 'multipleChoiceBackBtn', action: () => window.gameSystem?.showGameMenu() },
                     { id: 'bossFightBackBtn', action: () => window.gameSystem?.showGameMenu() }
@@ -659,6 +785,7 @@
                     const element = document.getElementById(btn.id);
                     if (element) {
                         element.onclick = btn.action;
+                        console.log(`✅ Button handler set: ${btn.id}`);
                     }
                 });
                 
@@ -670,6 +797,7 @@
                 
                 if (skipIntroBtn) {
                     skipIntroBtn.onclick = () => {
+                        console.log('Skip intro clicked');
                         document.getElementById('storyContainer').style.display = 'none';
                         if (window.gameSystem) {
                             window.gameSystem.showGameMenu();
@@ -679,6 +807,7 @@
                 
                 if (continueStoryBtn) {
                     continueStoryBtn.onclick = () => {
+                        console.log('Continue story clicked');
                         document.getElementById('storyContainer').style.display = 'none';
                         if (window.gameSystem) {
                             window.gameSystem.showGameMenu();
@@ -687,23 +816,29 @@
                 }
                 
                 if (playAgainBtn) {
-                    playAgainBtn.onclick = () => window.location.reload();
+                    playAgainBtn.onclick = () => {
+                        console.log('Play again clicked');
+                        window.location.reload();
+                    };
                 }
                 
                 if (backToMenuBtn) {
                     backToMenuBtn.onclick = () => {
+                        console.log('Back to menu clicked');
                         document.getElementById('endingContainer').style.display = 'none';
                         if (window.gameSystem) {
                             window.gameSystem.showMainMenu();
                         }
                     };
                 }
+                
+                console.log('✅ All enhanced button handlers set up successfully');
             };
             
-            // Set up fallback handlers immediately
+            // Set up handlers immediately
             setupFallbackHandlers();
             
-            // Set up again after scripts might be loaded
+            // Set up again after scripts load
             setTimeout(setupFallbackHandlers, 2000);
         });
     </script>
